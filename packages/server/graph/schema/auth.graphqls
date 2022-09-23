@@ -1,0 +1,19 @@
+input SignUpInput {
+    organizationName: String!
+    userName: String!
+    userEmail: String!
+    userPassword: String!
+}
+
+input LogInInput {
+    userEmail: String!
+    userPassword: String!
+}
+
+type Query {
+    logIn(input: LogInInput!): User!
+}
+
+type Mutation {
+    signUp(input: SignUpInput!): User!
+}

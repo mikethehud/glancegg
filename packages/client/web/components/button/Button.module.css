@@ -1,0 +1,10 @@
+.button {
+    background-color: black;
+    color: white;
+    width: 300px;
+}
+
+.button.negative {
+    background-color: white;
+    color: black;
+}

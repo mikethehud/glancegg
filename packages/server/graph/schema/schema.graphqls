@@ -1,0 +1,9 @@
+type Organization {
+    id: ID!
+    name: String!
+}
+
+type Team {
+    id: ID!
+    name: String!
+}
