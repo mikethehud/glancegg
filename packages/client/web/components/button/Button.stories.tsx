@@ -10,7 +10,8 @@ export default {
         componentSubtitle: 'This is a button',
     },
     args: {
-        negative: false
+        primary: true,
+        small: false,
     }
 } as ComponentMeta<typeof Button>
 

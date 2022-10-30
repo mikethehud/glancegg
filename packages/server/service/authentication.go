@@ -23,7 +23,7 @@ func (s *Service) SignUpWithPassword(ctx context.Context, orgName, userName, use
 	}
 	orgID, err := queries.CreateOrganization(ctx, tx, s.valid, org)
 	if err != nil {
-		return nil, nil, utils.InternalError(s.log, err, "error inserting organisation into db")
+		return nil, nil, utils.InternalError(s.Logger, err, "error inserting organisation into db")
 	}
 	org.ID = orgID
 
@@ -43,13 +43,13 @@ func (s *Service) SignUpWithPassword(ctx context.Context, orgName, userName, use
 		if strings.Contains(err.Error(), "unique constraint") {
 			return nil, nil, errors.New(utils.ErrorAuthUserNotUnique)
 		}
-		return nil, nil, utils.InternalError(s.log, err, "error inserting user into db")
+		return nil, nil, utils.InternalError(s.Logger, err, "error inserting user into db")
 	}
 	user.ID = userID
 
 	err = tx.Commit()
 	if err != nil {
-		return nil, nil, utils.InternalError(s.log, err, "error committing signup transaction")
+		return nil, nil, utils.InternalError(s.Logger, err, "error committing signup transaction")
 	}
 	return user, org, nil
 }
@@ -60,11 +60,12 @@ func (s *Service) LogInWithPassword(ctx context.Context, email, password string)
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, errors.New(utils.ErrorAuthNoUser)
 		}
-		return nil, utils.InternalError(s.log, err, "error selecting user from db")
+		return nil, utils.InternalError(s.Logger, err, "error selecting user from db")
 	}
 	err = utils.ComparePassword(u.Password, password)
 	if err != nil {
 		return nil, errors.New(utils.ErrorAuthWrongPassword)
 	}
+
 	return u, nil
 }

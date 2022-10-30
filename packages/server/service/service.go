@@ -7,15 +7,15 @@ import (
 )
 
 type Service struct {
-	dbx   *sqlx.DB
-	valid *validator.Validate
-	log   *logrus.Logger
+	dbx    *sqlx.DB
+	valid  *validator.Validate
+	Logger *logrus.Logger
 }
 
 func NewService(dbx *sqlx.DB, valid *validator.Validate, log *logrus.Logger) *Service {
 	return &Service{
-		dbx:   dbx,
-		valid: valid,
-		log:   log,
+		dbx:    dbx,
+		valid:  valid,
+		Logger: log,
 	}
 }

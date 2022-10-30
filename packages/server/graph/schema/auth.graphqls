@@ -10,8 +10,20 @@ input LogInInput {
     userPassword: String!
 }
 
+type LogInResponse {
+    user: User!
+    tokens: Tokens!
+}
+
+type Tokens {
+    authToken: String!
+    refreshToken: String!
+}
+
 type Query {
-    logIn(input: LogInInput!): User!
+    logIn(input: LogInInput!): LogInResponse!
+    newTokens(token: String!): Tokens!
+    organization: Organization!
 }
 
 type Mutation {

@@ -1,10 +1,21 @@
 .button {
-    background-color: black;
-    color: white;
-    width: 300px;
+    background-color: var(--color-background);
+    color: var(--color-text);
+    border: 2px solid var(--color-text);
+    padding: var(--space-s) var(--space-m);
+    font-weight: bold;
+    font-size: var(--text-size-regular);
+    text-transform: uppercase;
+    cursor: pointer;
+    position: relative;
 }
 
-.button.negative {
-    background-color: white;
-    color: black;
+.button.primary {
+    background-color: var(--color-text);
+    color: var(--color-background);
+}
+
+button.small {
+    padding: var(--space-xs) var(--space-s);
+    font-size: var(--text-size-small);
 }

@@ -1,0 +1,10 @@
+.link {
+    color: blue;
+    text-transform: uppercase;
+    cursor: pointer;
+    position: relative;
+}
+
+.link.primary {
+    font-weight: bold;
+}

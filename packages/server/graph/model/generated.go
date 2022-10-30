@@ -7,6 +7,11 @@ type LogInInput struct {
 	UserPassword string `json:"userPassword"`
 }
 
+type LogInResponse struct {
+	User   *User   `json:"user"`
+	Tokens *Tokens `json:"tokens"`
+}
+
 type Organization struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
@@ -22,6 +27,11 @@ type SignUpInput struct {
 type Team struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
+}
+
+type Tokens struct {
+	AuthToken    string `json:"authToken"`
+	RefreshToken string `json:"refreshToken"`
 }
 
 type User struct {

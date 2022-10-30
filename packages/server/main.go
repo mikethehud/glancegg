@@ -4,11 +4,13 @@ import (
 	"database/sql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/go-chi/chi/v5"
 	"github.com/jmoiron/sqlx"
 	"github.com/mikethehud/glancegg/packages/server/graph/generated"
 	"github.com/mikethehud/glancegg/packages/server/graph/resolver"
 	"github.com/mikethehud/glancegg/packages/server/service"
 	"github.com/mikethehud/glancegg/packages/server/types"
+	"github.com/mikethehud/glancegg/packages/server/utils"
 	"github.com/pkg/errors"
 	"github.com/pressly/goose"
 	"net/http"
@@ -61,7 +63,7 @@ func main() {
 	}
 }
 
-// connectDB establishes a connection the the db
+// connectDB establishes a connection the db
 func connectDB(dsn string) (*sqlx.DB, error) {
 	db, err := sql.Open(dbDriver, dsn)
 	if err != nil {
@@ -89,6 +91,9 @@ func RunMigrate(log *logrus.Logger, dbx *sqlx.DB) {
 }
 
 func RunServer(log *logrus.Logger, dbx *sqlx.DB) {
+	r := chi.NewRouter()
+	r.Use(authMiddleware())
+
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{
 		Resolvers: &resolver.Resolver{
 			Service: service.NewService(dbx, types.NewValidator(), log),
@@ -96,8 +101,31 @@ func RunServer(log *logrus.Logger, dbx *sqlx.DB) {
 	}))
 
 	log.Infof("Starting graphql on port %s", graphqlPort)
-	log.Infof("Visit playground on localhost:%s/graphiql", graphqlPort)
-	http.Handle("/graphiql", playground.Handler("GraphQL playground", "/graphql"))
-	http.Handle("/graphql", srv)
-	log.Fatal(http.ListenAndServe(":"+graphqlPort, nil))
+	log.Infof("Visit playground on http://localhost:%s/graphiql", graphqlPort)
+	r.Handle("/graphiql", playground.Handler("GraphQL playground", "/graphql"))
+	r.Handle("/graphql", srv)
+	log.Fatal(http.ListenAndServe(":"+graphqlPort, r))
+}
+
+func authMiddleware() func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			authToken := r.Header.Get("Authorization")
+
+			if authToken == "" {
+				next.ServeHTTP(w, r)
+				return
+			}
+
+			claims, err := utils.ParseAuthToken(authToken)
+			if err != nil {
+				http.Error(w, `{"errors":{"message":"INVALID_TOKEN"}}`, http.StatusForbidden)
+				return
+			}
+
+			ctx := utils.ContextWithAuthClaims(r.Context(), claims)
+			r = r.WithContext(ctx)
+			next.ServeHTTP(w, r)
+		})
+	}
 }

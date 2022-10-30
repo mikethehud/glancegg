@@ -1,0 +1,10 @@
+.navigation {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin: var(--space-xl) 0 var(--space-m);
+}
+
+.logo {
+    cursor: pointer;
+}

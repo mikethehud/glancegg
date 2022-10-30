@@ -1,0 +1,62 @@
+@import url('./fonts.css');
+
+:root {
+  --color-black: #222;
+  --color-white: #fff;
+  --color-yellow: #00ff47;
+  --color-blue: #0066FF;
+
+  --color-background: var(--color-white);
+  --color-text: var(--color-black);
+
+  --text-size-big: 32px;
+  --text-size-regular: 24px;
+  --text-size-small: 16px;
+
+  --space-unit: 4px;
+  --space-xxs: calc(1 * var(--space-unit));
+  --space-xs: calc(2 * var(--space-unit));
+  --space-s: calc(3 * var(--space-unit));
+  --space-m: calc(5 * var(--space-unit));
+  --space-l: calc(8 * var(--space-unit));
+  --space-xl: calc(13 * var(--space-unit));
+  --space-xxl: calc(21 * var(--space-unit));
+}
+
+html,
+body,
+#__next {
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  color: var(--color-text);
+  background-color: var(--color-background);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+h1 {
+  font-size: var(--text-size-big);
+  margin-block-start: .5em;
+  margin-block-end: .5em;
+}
+
+p {
+  margin-block-start: .5em;
+  margin-block-end: .5em;
+  line-height: 1.2em;
+}
+
+* {
+  box-sizing: border-box;
+  font-size: var(--text-size-regular);
+  font-family: "Sofia Sans";
+}
+
+.text-small {
+  font-size: var(--text-size-small)
+}

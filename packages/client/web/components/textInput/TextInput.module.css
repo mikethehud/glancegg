@@ -1,0 +1,15 @@
+.textInput {
+    background-color: silver;
+    padding: var(--space-s) var(--space-m);
+    border: 2px solid silver;
+}
+
+.error {
+    border-color: red;
+}
+
+.errorMessage {
+    color: red;
+    font-size: var(--text-size-small);
+    padding-top: var(--space-xs);
+}

@@ -1,0 +1,29 @@
+.layout {
+    margin: 0 auto;
+    grid-template-rows: auto 1fr auto;
+    grid-template-columns: 100%;
+    display: grid;
+    max-width: 1024px;
+    padding: 0px var(--space-m);
+    min-height: 100%;
+}
+
+.footer {
+    display: flex;
+    margin: var(--space-l) 0 var(--space-l) 0;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.footerSocials {
+    text-align: right;
+}
+
+.footerSocials a {
+    opacity: 0.5;
+    margin-left: var(--space-s);
+}
+
+.footerSocials a:hover {
+    opacity: 1;
+}
