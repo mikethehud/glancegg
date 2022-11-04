@@ -1,0 +1,37 @@
+.userBadge {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: var(--space-xs);
+}
+
+.userBadge:hover {
+    background-color: silver;
+    cursor: pointer;
+}
+
+.userBadge.active {
+    background-color: var(--color-text);
+    color: var(--color-background);
+}
+
+.userBadge.active:hover {
+    background-color: rgb(50,50,50);
+}
+
+.badge {
+    width: var(--space-m);
+    height: var(--space-m);
+    background-color: grey;
+    line-height: var(--space-m);
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: bold;
+    color: var(--color-background);
+    font-size: var(--text-size-small);
+    margin-right: var(--space-xs);
+}
+
+.chevron {
+    font-size: var(--text-size-xsmall);
+}

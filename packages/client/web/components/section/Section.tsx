@@ -1,7 +1,7 @@
 import classNames from "classnames";
 import React, { ReactNode } from "react"
 import styles from "./Section.module.css"
-import { Navigation } from "../layout/navigation/Navigation";
+import { Navigation } from "../layout/navigation/NavigationPublic";
 
 type SectionSize = "small" | "medium" | "full"
 

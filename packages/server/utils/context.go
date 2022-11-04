@@ -7,8 +7,10 @@ import (
 type contextKey int
 
 const (
-	userIDContextKey contextKey = iota
-	orgIDContextKey  contextKey = iota
+	userIDContextKey       contextKey = iota
+	orgIDContextKey        contextKey = iota
+	refreshTokenContextKey contextKey = iota
+	httpWriterContextKey   contextKey = iota
 )
 
 func ContextUserID(ctx context.Context) string {
@@ -27,9 +29,35 @@ func ContextOrgID(ctx context.Context) string {
 	return ""
 }
 
+func ContextRefreshToken(ctx context.Context) string {
+	refreshToken := ctx.Value(refreshTokenContextKey)
+	if refreshToken != nil {
+		return refreshToken.(string)
+	}
+	return ""
+}
+
+func ContextCookieWriter(ctx context.Context) *CookieWriter {
+	w := ctx.Value(httpWriterContextKey)
+	if w != nil {
+		return w.(*CookieWriter)
+	}
+	return nil
+}
+
 func ContextWithAuthClaims(ctx context.Context, claims *AuthClaims) context.Context {
 	ctx = context.WithValue(ctx, userIDContextKey, claims.UserID)
 	ctx = context.WithValue(ctx, orgIDContextKey, claims.OrgID)
+	return ctx
+}
+
+func ContextWithRefreshToken(ctx context.Context, token string) context.Context {
+	ctx = context.WithValue(ctx, refreshTokenContextKey, token)
+	return ctx
+}
+
+func ContextWithCookieWriter(ctx context.Context, cw *CookieWriter) context.Context {
+	ctx = context.WithValue(ctx, httpWriterContextKey, cw)
 	return ctx
 }
 

@@ -8,8 +8,8 @@ type LogInInput struct {
 }
 
 type LogInResponse struct {
-	User   *User   `json:"user"`
-	Tokens *Tokens `json:"tokens"`
+	User      *User  `json:"user"`
+	AuthToken string `json:"authToken"`
 }
 
 type Organization struct {
@@ -27,11 +27,6 @@ type SignUpInput struct {
 type Team struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
-}
-
-type Tokens struct {
-	AuthToken    string `json:"authToken"`
-	RefreshToken string `json:"refreshToken"`
 }
 
 type User struct {

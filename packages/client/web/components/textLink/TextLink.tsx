@@ -4,18 +4,22 @@ import React from "react"
 import styles from "./TextLink.module.css"
 
 type Props = {
+}
+
+type TextLinkProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
     primary?: boolean
 }
 
-type TextLinkProps = Props & React.AnchorHTMLAttributes<HTMLAnchorElement>
-
-export const TextLink = ({ primary, children, ...props }: TextLinkProps) => (
-    <a
-        {...props}
-        className={classNames(styles.link, {
-            [styles.primary]: primary,
-        })}
-    >
-        {children}
-    </a>
+export const TextLink = React.forwardRef<HTMLAnchorElement, TextLinkProps>(
+    ({ primary, children, ...props }, forwardRef) => (
+        <a
+            {...props}
+            className={classNames(styles.link, {
+                [styles.primary]: primary,
+            })}
+            ref={forwardRef}
+        >
+            {children}
+        </a>
+    )
 )

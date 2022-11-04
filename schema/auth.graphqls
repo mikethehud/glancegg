@@ -1,0 +1,27 @@
+input SignUpInput {
+    organizationName: String!
+    userName: String!
+    userEmail: String!
+    userPassword: String!
+}
+
+input LogInInput {
+    userEmail: String!
+    userPassword: String!
+}
+
+type LogInResponse {
+    user: User!
+    authToken: String!
+}
+
+type Query {
+    authToken: String!
+    organization: Organization!
+}
+
+type Mutation {
+    signUp(input: SignUpInput!): User!
+    logIn(input: LogInInput!): LogInResponse!
+    logOut: Boolean
+}

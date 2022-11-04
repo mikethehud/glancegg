@@ -21,7 +21,8 @@ type AuthClaims struct {
 }
 
 type RefreshClaims struct {
-	UserID string
+	UserID  string
+	Expires *time.Time
 }
 
 func GenerateTokens(user *types.User) (string, string, error) {
@@ -83,13 +84,19 @@ func ParseRefreshToken(tokenStr string) (*RefreshClaims, error) {
 		return nil, errors.Wrap(err, "could not parse refresh token")
 	}
 
-	userID, ok := claims["userId"].(string)
+	userID, ok := claims["userID"].(string)
 	if !ok {
 		return nil, errors.New("could not cast userID as string")
 	}
 
+	expiry, err := getExpiryFromClaim(claims["exp"])
+	if err != nil {
+		return nil, errors.Wrap(err, "error retrieving expiry claim")
+	}
+
 	return &RefreshClaims{
-		UserID: userID,
+		UserID:  userID,
+		Expires: expiry,
 	}, nil
 }
 
@@ -118,13 +125,11 @@ func parseToken(tokenStr string, expiry time.Duration) (jwt.MapClaims, error) {
 
 func validateExpiry(expiryClaim interface{}, duration time.Duration) error {
 	// parse expiry
-	exp, ok := expiryClaim.(float64)
-	if !ok {
+	expTime, err := getExpiryFromClaim(expiryClaim)
+	if err != nil {
 		fmt.Println(expiryClaim)
 		return errors.New("could not cast jwt expiry as float64")
 	}
-
-	expTime := time.Unix(int64(exp), 0)
 
 	// make sure expiry is not set too far in the future
 	if expTime.After(time.Now().Add(duration)) {
@@ -137,4 +142,15 @@ func validateExpiry(expiryClaim interface{}, duration time.Duration) error {
 	}
 
 	return nil
+}
+
+func getExpiryFromClaim(expiryClaim interface{}) (*time.Time, error) {
+	exp, ok := expiryClaim.(float64)
+	if !ok {
+		return nil, errors.New("could not cast jwt expiry as float64")
+	}
+
+	t := time.Unix(int64(exp), 0)
+
+	return &t, nil
 }

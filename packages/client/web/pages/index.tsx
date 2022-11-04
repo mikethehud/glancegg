@@ -1,9 +1,12 @@
 import type { NextPage } from 'next'
 import { LandingContent } from '../components/landingContent/LandingContent'
+import { LayoutPublic } from '../components/layout/LayoutPublic'
 
 const Home: NextPage = () => {
   return (
-    <LandingContent />
+    <LayoutPublic>
+      <LandingContent />
+    </LayoutPublic>
   )
 }
 

@@ -15,7 +15,17 @@
     color: var(--color-background);
 }
 
-button.small {
+.button.small {
     padding: var(--space-xs) var(--space-s);
     font-size: var(--text-size-small);
+}
+
+.button:disabled {
+    cursor: default;
+    opacity: .7;
+}
+
+.button > svg {
+    margin-right: var(--space-s);
+    font-size: var(--text-size-regular);
 }

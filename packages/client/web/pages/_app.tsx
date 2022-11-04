@@ -1,16 +1,19 @@
 import '../styles/global.css'
 
 import type { AppProps } from 'next/app'
-import { Layout } from '../components/layout/Layout'
 import { config } from '@fortawesome/fontawesome-svg-core'
+import { ApolloProvider } from '@apollo/client';
 import '@fortawesome/fontawesome-svg-core/styles.css'
+import React from 'react'
 config.autoAddCss = false
+
+import { client } from '../lib/clients/apolloClient'
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <Layout>
+    <ApolloProvider client={client}>
       <Component {...pageProps} />
-    </Layout>
+    </ApolloProvider>
   )
 }
 

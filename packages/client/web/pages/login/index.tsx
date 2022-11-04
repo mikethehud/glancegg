@@ -1,5 +1,5 @@
 import { NextPage } from "next";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "../../components/button/Button";
 import { FormElement } from "../../components/formElement/FormElement";
 import { Section } from "../../components/section/Section";
@@ -7,84 +7,93 @@ import { TextInput } from "../../components/textInput/TextInput";
 import Link from "next/link";
 import { TextLink } from "../../components/textLink/TextLink";
 import styles from "./Login.module.css"
+import { SubmitHandler, useForm } from "react-hook-form";
+import { useLogInMutation } from "../../lib/graphql/generated/generated";
+import { FormError } from "../../components/formError/FormError";
+import { useRouter } from "next/router";
+import { getToken } from "../../lib/jwt/jwt";
+import { LayoutPublic } from "../../components/layout/LayoutPublic";
 
-type LoginForm = {
-    password: {
-        value: string
-        error: string
-    }
-    email: {
-        value: string
-        error: string
-    }
-}
+type Inputs = {
+    email: string,
+    password: string,
+};
 
 const Login: NextPage = () => {
-    const [form, setForm] = useState<LoginForm>({
-        password: {value:"",error:""},
-        email: {value:"",error:""},
-    })
+    const { register, handleSubmit, formState: { errors } } = useForm<Inputs>({ reValidateMode: "onChange" });
+    const [logIn, { data, loading, error }] = useLogInMutation()
+    const router = useRouter()
 
-    const handleEmailChange = (value: string) => {
-        setForm({
-            ...form,
-            email: {
-                value,
-                error: ""
+    const doRedirect = () => {
+        if(router.query.redirectTo) {
+            router.push(router.query.redirectTo as string)
+        }
+        else {
+            router.push('/home')
+        }
+    }
+
+    useEffect(() => {
+        const checkToken = async () => {
+            const token = await getToken();
+            if (token !== "") {
+                doRedirect()
+            }
+        };
+        checkToken();
+    }, [])
+
+    const onSubmit: SubmitHandler<Inputs> = async (formData) => {
+        logIn({
+            variables: {
+                input: {
+                    userEmail: formData.email,
+                    userPassword: formData.password,
+                }
             }
         })
     }
 
-    const handlePasswordChange = (value: string) => {
-        setForm({
-            ...form,
-            password: {
-                value,
-                error: ""
-            }
-        })
+    const getErrorMessage = (code: string): string => {
+        switch (code) {
+            case "USER_DOESNT_EXIST":
+                return "A user with this email doesn't exist."
+            case "WRONG_PASSWORD":
+                return "Please enter the correct password for this user."
+            default:
+                return "Unknown error."
+        }
     }
 
-    const handleSubmit = () => {
-        setForm({
-            email: {
-                ...form.email,
-                error: form.email.value == "" ? "Email can't be empty" : ""
-            },
-            password: {
-                ...form.password,
-                error: form.password.value == "" ? "Password can't be empty" : ""
-            }
-        })
+    if (data) {
+        doRedirect()
     }
 
     return (
-        <>
+        <LayoutPublic>
             <Section size="small">
-                <h1>Login</h1>
-                <p>Email: {form.email.value} {form.email.error}</p>
-                <p>Email: {form.password.value} {form.password.error}</p>
-                <FormElement label="Email">
-                    <TextInput
-                        value={form.email.value}
-                        type="email"
-                        placeholder="Enter Email"
-                        error={form.email.error}
-                        onChange={e => handleEmailChange(e.target.value)}
-                    />
-                </FormElement>
-                <FormElement label="Password">
-                    <TextInput
-                        value={form.password.value}
-                        type="password"
-                        placeholder="Enter Password"
-                        error={form.password.error}
-                        onChange={e => handlePasswordChange(e.target.value)}
-                    />
-                </FormElement>
-                <p>
-                    <Button primary onClick={() => handleSubmit()}>Log In</Button>
-                </p>
+                <form onSubmit={handleSubmit(onSubmit)}><h1>Login</h1>
+                    <FormElement label="Email">
+                        <TextInput
+                            type="email"
+                            placeholder="Enter Email"
+                            error={errors.email && "Enter your email"}
+                            {...register("email", { required: true })}
+                        />
+                    </FormElement>
+                    <FormElement label="Password">
+                        <TextInput
+                            type="password"
+                            placeholder="Enter Password"
+                            error={errors.password && "Enter your password"}
+                            {...register("password", { required: true })}
+                        />
+                    </FormElement>
+                    {error && <FormError error={getErrorMessage(error.message)} />}
+                    <p>
+                        <Button primary loading={loading} type="submit">Log In</Button>
+                    </p>
+                </form>
             </Section>
             <Section size="small" className={styles.bottomLinks}>
                 <div>
@@ -94,7 +103,7 @@ const Login: NextPage = () => {
                     <Link href="/"><TextLink>Forgot Password</TextLink></Link>
                 </div>
             </Section>
-        </>
+        </LayoutPublic>
     )
 }
 

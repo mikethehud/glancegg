@@ -5,6 +5,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
 	"github.com/jmoiron/sqlx"
 	"github.com/mikethehud/glancegg/packages/server/graph/generated"
 	"github.com/mikethehud/glancegg/packages/server/graph/resolver"
@@ -92,7 +93,18 @@ func RunMigrate(log *logrus.Logger, dbx *sqlx.DB) {
 
 func RunServer(log *logrus.Logger, dbx *sqlx.DB) {
 	r := chi.NewRouter()
-	r.Use(authMiddleware())
+	r.Use(cors.Handler(cors.Options{
+		// todo: make cors stricter
+		AllowedOrigins:   []string{"https://*", "http://*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		MaxAge:           300, // Maximum value not ignored by any of major browsers
+	}))
+	r.Use(authTokenMiddleware())
+	r.Use(refreshTokenMiddleware())
+	r.Use(cookieWriterMiddleWare())
 
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{
 		Resolvers: &resolver.Resolver{
@@ -107,7 +119,7 @@ func RunServer(log *logrus.Logger, dbx *sqlx.DB) {
 	log.Fatal(http.ListenAndServe(":"+graphqlPort, r))
 }
 
-func authMiddleware() func(http.Handler) http.Handler {
+func authTokenMiddleware() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			authToken := r.Header.Get("Authorization")
@@ -119,11 +131,41 @@ func authMiddleware() func(http.Handler) http.Handler {
 
 			claims, err := utils.ParseAuthToken(authToken)
 			if err != nil {
-				http.Error(w, `{"errors":{"message":"INVALID_TOKEN"}}`, http.StatusForbidden)
+				http.Error(w, `{"errors":{"message":"INVALID_AUTH_TOKEN"}}`, http.StatusForbidden)
 				return
 			}
 
 			ctx := utils.ContextWithAuthClaims(r.Context(), claims)
+			r = r.WithContext(ctx)
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
+func refreshTokenMiddleware() func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// get refresh token
+			token, err := utils.GetRefreshToken(r)
+			if err != nil {
+				next.ServeHTTP(w, r)
+				return
+			}
+
+			ctx := utils.ContextWithRefreshToken(r.Context(), token)
+			r = r.WithContext(ctx)
+
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
+func cookieWriterMiddleWare() func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			cw := utils.NewCookieWriter(&w)
+			// put cookie writer into context
+			ctx := utils.ContextWithCookieWriter(r.Context(), cw)
 			r = r.WithContext(ctx)
 			next.ServeHTTP(w, r)
 		})
