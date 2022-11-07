@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (s *Service) GetUserWithID(ctx context.Context, userID string) (*types.User, error) {
+func (s *Service) GetUserByID(ctx context.Context, userID string) (*types.User, error) {
 	u, err := queries.GetUserByID(ctx, s.dbx, userID)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot retrieve user")

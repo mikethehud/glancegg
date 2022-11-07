@@ -27,10 +27,3 @@
 .footerSocials a:hover {
     opacity: 1;
 }
-
-.spinner {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-xxl);
-}

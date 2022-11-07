@@ -12,7 +12,7 @@ var SecretKey = []byte("secret")
 
 var (
 	authExpiryDuration    = time.Minute * 10
-	refreshExpiryDuration = time.Hour * 500
+	refreshExpiryDuration = time.Hour * 24 * 30
 )
 
 type AuthClaims struct {

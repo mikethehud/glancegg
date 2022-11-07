@@ -24,6 +24,11 @@ type SignUpInput struct {
 	UserPassword     string `json:"userPassword"`
 }
 
+type SignUpResponse struct {
+	User      *User  `json:"user"`
+	AuthToken string `json:"authToken"`
+}
+
 type Team struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`

@@ -1,4 +1,9 @@
 .formElement {
+    display: block;
+    width: 100%;
+}
+
+.inner {
     display: flex;
     flex-direction: column;
     padding: var(--space-s) 0;

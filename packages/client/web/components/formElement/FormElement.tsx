@@ -1,4 +1,3 @@
-import classNames from "classnames";
 import React, { ReactNode } from "react"
 import styles from "./FormElement.module.css"
 
@@ -9,9 +8,11 @@ type FormElementProps = {
 
 export const FormElement = ({ label, children }: FormElementProps) => (
     <div
-        className={classNames(styles.formElement)}
+        className={styles.formElement}
     >
-        {label && <label>{label}</label>}
-        {children}
+        <div className={styles.inner}>
+            {label && <label>{label}</label>}
+            {children}
+        </div>
     </div>
 )

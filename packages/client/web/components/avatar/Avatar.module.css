@@ -1,0 +1,12 @@
+.avatar {
+    width: var(--space-m);
+    height: var(--space-m);
+    background-color: grey;
+    line-height: var(--space-m);
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: bold;
+    color: var(--color-background);
+    font-size: var(--text-size-small);
+    position: relative;
+}

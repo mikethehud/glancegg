@@ -1,10 +1,45 @@
-import React, { useState } from "react"
+import React, { PropsWithChildren, useEffect, useState } from "react"
 import styles from "./Navigation.module.css"
 import Link from "next/link";
 import { UserDropdown } from "./UserDropdown";
 import { Logo } from "./Logo";
+import { useGetUserQuery } from "../../../lib/graphql/generated/generated";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBell, faCheckToSlot, faHandBackFist } from "@fortawesome/free-solid-svg-icons";
+import classNames from "classnames";
+import { UrlObject } from "url";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { useRouter } from "next/router";
+
+interface MenuItemProps {
+    icon: IconProp
+    href: string
+    currentPath: string
+    notifications?: number
+}
+
+const MenuItem = ({ icon, href, currentPath, notifications, children }: MenuItemProps&PropsWithChildren) => {
+    const classes = classNames(
+        styles.menuItem,
+        notifications && styles.hasNotifications,
+        currentPath === href && styles.active
+    )
+    
+    return (
+        <Link href={href}>
+            <div className={classes}>
+                {notifications && (<div className={styles.badge} />)}
+                <FontAwesomeIcon icon={icon} className={styles.icon} />
+                {children}
+            </div>
+        </Link>
+    )
+}
 
 export const Navigation = () => {
+    const { data, loading, error } = useGetUserQuery()
+    const { asPath } = useRouter()
+
     return (
         <div className={styles.navigation}>
             <Link href="/">
@@ -13,7 +48,10 @@ export const Navigation = () => {
                 </a>
             </Link>
             <div className={styles.right}>
-                <UserDropdown />
+                <MenuItem currentPath={asPath} href="/checkins" icon={faCheckToSlot}>Check Ins</MenuItem>
+                <MenuItem currentPath={asPath} href="/reports" icon={faHandBackFist}>Fistbumps</MenuItem>
+                <div className={styles.divider} />
+                <UserDropdown user={data?.user} loading={loading} />
             </div>
         </div>
     )

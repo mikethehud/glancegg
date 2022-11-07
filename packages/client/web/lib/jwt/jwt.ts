@@ -10,6 +10,7 @@ interface JwtData extends JwtPayload {
 }
 
 export const storeToken = (token: string) => {
+    console.log("storing token")
     localStorage.setItem(jwtKey, token)
 }
 
@@ -18,12 +19,11 @@ export const getLocalToken = (): string | null => {
 }
 
 export async function getToken(): Promise<string> {
-    console.log("getToken() invoked")
     const token = getLocalToken()
     if (!token || tokenExpiresSoon(token)) {
         // either we have no auth token, or we need to get a new one
         try {
-            const { data } = await clientNoAuth.query<GetAuthTokenQuery>({ query: GetAuthTokenDocument })
+            const { data } = await clientNoAuth.query<GetAuthTokenQuery>({ query: GetAuthTokenDocument, fetchPolicy: "no-cache" })
             storeToken(data.authToken)
             return data.authToken
         } catch (e) {
@@ -60,5 +60,6 @@ export const getUserIDFromToken = (token: string): string => {
 }
 
 export const removeToken = () => {
+    console.log("removing token")
     return localStorage.removeItem(jwtKey)
 }

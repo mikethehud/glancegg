@@ -1,7 +1,12 @@
 .textInput {
-    background-color: silver;
+    background-color: var(--color-gray);
     padding: var(--space-s) var(--space-m);
-    border: 2px solid silver;
+    border: 1px solid var(--color-gray);
+    border-radius: var(--border-radius);
+    font-size: var(--text-size-regular);
+    font-family: "Sofia Sans";
+    color: var(--color-text);
+    display: block;
 }
 
 .error {

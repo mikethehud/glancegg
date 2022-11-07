@@ -5,6 +5,11 @@ input SignUpInput {
     userPassword: String!
 }
 
+type SignUpResponse {
+    user: User!
+    authToken: String!
+}
+
 input LogInInput {
     userEmail: String!
     userPassword: String!
@@ -15,13 +20,12 @@ type LogInResponse {
     authToken: String!
 }
 
-type Query {
+extend type Query {
     authToken: String!
-    organization: Organization!
 }
 
-type Mutation {
-    signUp(input: SignUpInput!): User!
+extend type Mutation {
+    signUp(input: SignUpInput!): SignUpResponse!
     logIn(input: LogInInput!): LogInResponse!
     logOut: Boolean
 }

@@ -2,5 +2,6 @@
     padding: var(--space-s);
     font-size: var(--text-size-small);
     background-color: red;
-    color: var(--color-background);
+    color: var(--color-text);
+    width: 100%;
 }

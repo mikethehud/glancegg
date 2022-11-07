@@ -3,35 +3,33 @@
     flex-direction: row;
     align-items: center;
     padding: var(--space-xs);
+    border-radius: var(--border-radius);
 }
 
 .userBadge:hover {
-    background-color: silver;
+    background-color: var(--color-gray);
     cursor: pointer;
 }
 
 .userBadge.active {
-    background-color: var(--color-text);
-    color: var(--color-background);
+    background-color: var(--color-gray);
+    color: var(--color-white);
 }
 
-.userBadge.active:hover {
-    background-color: rgb(50,50,50);
+.userBadge.loading .chevron {
+    opacity: 0;
 }
 
-.badge {
-    width: var(--space-m);
-    height: var(--space-m);
-    background-color: grey;
-    line-height: var(--space-m);
-    text-align: center;
-    text-transform: uppercase;
-    font-weight: bold;
-    color: var(--color-background);
-    font-size: var(--text-size-small);
-    margin-right: var(--space-xs);
+.userBadge.loading .badge {
+    background-color: transparent;
+    color: white;
+}
+
+.userBadge.loading:hover {
+    background-color: transparent;
 }
 
 .chevron {
+    margin-left: var(--space-xs);
     font-size: var(--text-size-xsmall);
 }

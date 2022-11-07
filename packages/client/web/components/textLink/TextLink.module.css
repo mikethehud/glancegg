@@ -1,5 +1,5 @@
 .link {
-    color: blue;
+    color: var(--color-link);
     text-transform: uppercase;
     cursor: pointer;
     position: relative;

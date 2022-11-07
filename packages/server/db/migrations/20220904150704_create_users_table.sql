@@ -7,6 +7,7 @@ CREATE TABLE users (
     password char(60),
     created_at timestamp NOT NULL DEFAULT NOW(),
     organization_id uuid REFERENCES organizations(id) NOT NULL,
+    reports_to uuid REFERENCES users(id),
     CONSTRAINT email_unique UNIQUE (email)
 );
 -- +goose StatementEnd

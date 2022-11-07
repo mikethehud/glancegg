@@ -1,0 +1,9 @@
+.split {
+    display: grid;
+    gap: 0 var(--space-xl);
+    grid-template-columns: 1fr 1fr;
+}
+
+.bottomLinks > div {
+    padding: var(--space-xxs) 0;
+}

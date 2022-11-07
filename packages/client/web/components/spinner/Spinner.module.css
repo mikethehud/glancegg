@@ -3,6 +3,13 @@
     animation: spin 1s infinite ease-in-out;
 }
 
+.pageSpinner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-xxl);
+}
+
 @keyframes spin {
     from {
         transform:rotate(0deg);

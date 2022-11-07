@@ -8,15 +8,30 @@ import (
 )
 
 // SignUp lets a user create a new org + user
-func (r *mutationResolver) SignUp(ctx context.Context, input model.SignUpInput) (*model.User, error) {
+func (r *mutationResolver) SignUp(ctx context.Context, input model.SignUpInput) (*model.SignUpResponse, error) {
 	u, _, err := r.Service.SignUpWithPassword(ctx, input.OrganizationName, input.UserName, input.UserEmail, input.UserPassword)
 	if err != nil {
 		return nil, err
 	}
-	return &model.User{
-		ID:    u.ID,
-		Name:  u.Name,
-		Email: u.Email,
+
+	authToken, refreshToken, err := utils.GenerateTokens(u)
+	if err != nil {
+		return nil, utils.InternalError(r.Service.Logger, err, "error generating tokens")
+	}
+
+	// set refresh token cookie
+	err = utils.SetRefreshToken(ctx, refreshToken)
+	if err != nil {
+		return nil, errors.Wrap(err, "errors setting refresh token")
+	}
+
+	return &model.SignUpResponse{
+		User: &model.User{
+			ID:    u.ID,
+			Name:  u.Name,
+			Email: u.Email,
+		},
+		AuthToken: authToken,
 	}, nil
 }
 
@@ -64,7 +79,7 @@ func (r *queryResolver) AuthToken(ctx context.Context) (string, error) {
 		return "", err
 	}
 
-	u, err := r.Service.GetUserWithID(ctx, claims.UserID)
+	u, err := r.Service.GetUserByID(ctx, claims.UserID)
 	if err != nil {
 		return "", err
 	}

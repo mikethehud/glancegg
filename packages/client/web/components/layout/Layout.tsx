@@ -5,7 +5,7 @@ import { Navigation } from "./navigation/Navigation";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faInstagram, faTwitter, faDiscord, faYoutube } from '@fortawesome/free-brands-svg-icons'
 import { useAuth } from "../../lib/hooks/useAuth";
-import { Spinner } from "../spinner/Spinner";
+import { PageSpinner, Spinner } from "../spinner/Spinner";
 
 interface LayoutProps {
     loading?: boolean
@@ -13,12 +13,6 @@ interface LayoutProps {
 
 export const Layout: FunctionComponent<LayoutProps&PropsWithChildren> = ({ loading, children }) => {
     useAuth()
-
-    const PageSpinner = () => (
-        <div className={styles.spinner}>
-            <Spinner />
-        </div>
-    )
 
     return (
         <div className={styles.layout}>

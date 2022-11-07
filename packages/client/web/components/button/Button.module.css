@@ -5,6 +5,7 @@
     padding: var(--space-s) var(--space-m);
     font-weight: bold;
     font-size: var(--text-size-regular);
+    font-family: "Sofia Sans";
     text-transform: uppercase;
     cursor: pointer;
     position: relative;

@@ -9,3 +9,78 @@
 .logo {
     cursor: pointer;
 }
+
+.right {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.menuItem {
+    position: relative;
+    font-size: var(--text-size-small);
+    padding: var(--space-xs) var(--space-s);
+    cursor: pointer;
+    margin-left: var(--space-xxs);
+    border-radius: var(--border-radius);
+    font-weight: normal;
+    font-family: "Sofia Sans";
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.menuItem .icon {
+    font-size: var(--text-size-xsmall);
+    margin-right: var(--space-xs);
+}
+
+.menuItem.hasNotifications {
+    background-color: var(--color-black-accent);
+}
+
+.menuItem:hover, .menuItem.hasNotifications:hover {
+    background-color: var(--color-gray);
+    opacity: 1;
+}
+
+.menuItem.active, .menuItem.active.hasNotifications {
+    color: var(--color-background);
+    background-color: var(--color-text);
+}
+
+.menuItem.active:hover {
+    color: var(--color-background);
+    background-color: var(--color-text);
+}
+
+.badge {
+    --size-badge: var(--space-s);
+    width: var(--size-badge);
+    height: var(--size-badge);
+    background-color: var(--color-blue);
+    border-radius: var(--space-m);
+    font-weight: bold;
+    line-height: var(--size-badge);
+    text-align: center;
+    font-family: "Sofia sans";
+    top: calc(var(--space-xxs) * -1);
+    right: calc(var(--space-xxs) * -1);
+    position: absolute;
+}
+
+.divider {
+    width: 1px;
+    height: var(--space-l);
+    margin: 0px var(--space-s);
+    background-color: var(--color-gray);
+}
+
+.orgLink {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.orgLink > div {
+    margin-right: var(--space-xs);
+}

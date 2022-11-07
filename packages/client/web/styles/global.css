@@ -2,17 +2,21 @@
 
 :root {
   --color-black: #222;
+  --color-black-accent: #303030;
   --color-white: #FFF5EE;
   --color-yellow: #00ff47;
-  --color-blue: #0066FF;
+  --color-blue: #0077ff;
+  --color-gray: #585562;
 
-  --color-background: var(--color-white);
-  --color-text: var(--color-black);
+  --color-background: var(--color-black);
+  --color-background-accent: var(--color-black-accent);
+  --color-text: var(--color-white);
+  --color-link: var(--color-blue);
 
   --text-size-big: 32px;
   --text-size-regular: 24px;
   --text-size-small: 16px;
-  --text-size-xsmall: 10px;
+  --text-size-xsmall: 12px;
 
   --space-unit: 4px;
   --space-xxs: calc(1 * var(--space-unit));
@@ -22,6 +26,8 @@
   --space-l: calc(8 * var(--space-unit));
   --space-xl: calc(13 * var(--space-unit));
   --space-xxl: calc(21 * var(--space-unit));
+
+  --border-radius: 4px;
 }
 
 html,
@@ -38,7 +44,7 @@ body,
 }
 
 a {
-  color: inherit;
+  color: var(--color-link);
   text-decoration: none;
 }
 

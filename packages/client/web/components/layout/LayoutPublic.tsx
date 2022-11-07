@@ -3,12 +3,17 @@ import styles from "./Layout.module.css"
 import { NavigationPublic } from "./navigation/NavigationPublic";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faInstagram, faTwitter, faDiscord, faYoutube } from '@fortawesome/free-brands-svg-icons'
+import { PageSpinner } from "../spinner/Spinner";
 
-export const LayoutPublic: FunctionComponent<PropsWithChildren> = ({ children }) => (
+interface LayoutProps {
+    loading?: boolean
+}
+
+export const LayoutPublic: FunctionComponent<LayoutProps&PropsWithChildren> = ({ loading, children }) => (
     <div className={styles.layout}>
         <NavigationPublic />
         <main>
-            {children}
+            {loading ? <PageSpinner /> : children}
         </main>
         <footer className={styles.footer}>
             <div className="text-small">

@@ -2,3 +2,7 @@ type Organization {
     id: ID!
     name: String!
 }
+
+extend type Query {
+    organization: Organization!
+}
