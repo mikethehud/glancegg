@@ -5,19 +5,9 @@ input SignUpInput {
     userPassword: String!
 }
 
-type SignUpResponse {
-    user: User!
-    authToken: String!
-}
-
 input LogInInput {
     userEmail: String!
     userPassword: String!
-}
-
-type LogInResponse {
-    user: User!
-    authToken: String!
 }
 
 extend type Query {
@@ -25,7 +15,7 @@ extend type Query {
 }
 
 extend type Mutation {
-    signUp(input: SignUpInput!): SignUpResponse!
-    logIn(input: LogInInput!): LogInResponse!
+    signUp(input: SignUpInput!): String!
+    logIn(input: LogInInput!): String!
     logOut: Boolean
 }

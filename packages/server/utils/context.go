@@ -7,10 +7,11 @@ import (
 type contextKey int
 
 const (
-	userIDContextKey       contextKey = iota
-	orgIDContextKey        contextKey = iota
-	refreshTokenContextKey contextKey = iota
-	httpWriterContextKey   contextKey = iota
+	userIDContextKey contextKey = iota
+	orgIDContextKey
+	roleContextKey
+	refreshTokenContextKey
+	httpWriterContextKey
 )
 
 func ContextUserID(ctx context.Context) string {
@@ -48,6 +49,7 @@ func ContextCookieWriter(ctx context.Context) *CookieWriter {
 func ContextWithAuthClaims(ctx context.Context, claims *AuthClaims) context.Context {
 	ctx = context.WithValue(ctx, userIDContextKey, claims.UserID)
 	ctx = context.WithValue(ctx, orgIDContextKey, claims.OrgID)
+	ctx = context.WithValue(ctx, roleContextKey, claims.Role)
 	return ctx
 }
 
@@ -62,5 +64,5 @@ func ContextWithCookieWriter(ctx context.Context, cw *CookieWriter) context.Cont
 }
 
 func IsAuthenticated(ctx context.Context) bool {
-	return ctx.Value(userIDContextKey) != nil && ctx.Value(orgIDContextKey) != nil
+	return ctx.Value(userIDContextKey) != nil && ctx.Value(orgIDContextKey) != nil && ctx.Value(roleContextKey) != nil
 }

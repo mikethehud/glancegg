@@ -1,9 +1,16 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { getToken, getUserIDFromToken } from "../jwt/jwt";
+import { Role } from "../graphql/generated/generated";
+import { getRoleFromToken, getToken, getUserIDFromToken } from "../jwt/jwt";
 
-export const useAuth = (): boolean => {
+interface AuthResponse {
+    authenticated: boolean
+    role?: Role
+}
+
+export const useAuth = (): AuthResponse => {
     const [authenticated, setAuthenticated] = useState(false)
+    const [role, setRole] = useState<Role>()
     const router = useRouter()
 
     useEffect(() => {
@@ -11,6 +18,7 @@ export const useAuth = (): boolean => {
             const token = await getToken();
             if (token !== "") {
                 setAuthenticated(true)
+                setRole(getRoleFromToken(token))
             } else {
                 // re-route to /login
                 router.push('/login?redirectTo=' + router.asPath)
@@ -19,5 +27,9 @@ export const useAuth = (): boolean => {
         
         checkToken();
     }, [])
-    return authenticated
+
+    return {
+        authenticated,
+        role,
+    }
 };

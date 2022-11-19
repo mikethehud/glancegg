@@ -2,11 +2,13 @@
 
 :root {
   --color-black: #222;
-  --color-black-accent: #303030;
-  --color-white: #FFF5EE;
+  --color-black-accent: #333;
+  --color-white: #fff;
+  --color-white-accent: #ebebeb;
   --color-yellow: #00ff47;
   --color-blue: #0077ff;
   --color-gray: #585562;
+  --color-red: #D62828;
 
   --color-background: var(--color-black);
   --color-background-accent: var(--color-black-accent);

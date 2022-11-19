@@ -17,6 +17,7 @@ var (
 
 type AuthClaims struct {
 	UserID string
+	Role   *types.Role
 	OrgID  string
 }
 
@@ -29,6 +30,7 @@ func GenerateTokens(user *types.User) (string, string, error) {
 	authToken, err := newToken(jwt.MapClaims{
 		"userID": user.ID,
 		"orgID":  user.OrganizationID,
+		"role":   user.Role,
 		"exp":    time.Now().Add(authExpiryDuration).Unix(),
 	})
 	if err != nil {
@@ -62,19 +64,17 @@ func ParseAuthToken(tokenStr string) (*AuthClaims, error) {
 		return nil, errors.Wrap(err, "could not parse auth token")
 	}
 
-	userID, ok := claims["userID"].(string)
-	if !ok {
-		return nil, errors.New("could not cast userID as string")
-	}
-
-	orgID, ok := claims["orgID"].(string)
-	if !ok {
-		return nil, errors.New("could not cast orgID as string")
+	userID := claims["userID"].(string)
+	orgID := claims["orgID"].(string)
+	role, err := types.RoleFromString(claims["role"].(string))
+	if err != nil {
+		return nil, errors.Wrap(err, "could not cast role")
 	}
 
 	return &AuthClaims{
 		UserID: userID,
 		OrgID:  orgID,
+		Role:   &role,
 	}, nil
 }
 

@@ -20,17 +20,11 @@ export type LogInInput = {
   userPassword: Scalars['String'];
 };
 
-export type LogInResponse = {
-  __typename?: 'LogInResponse';
-  authToken: Scalars['String'];
-  user: User;
-};
-
 export type Mutation = {
   __typename?: 'Mutation';
-  logIn: LogInResponse;
+  logIn: Scalars['String'];
   logOut?: Maybe<Scalars['Boolean']>;
-  signUp: SignUpResponse;
+  signUp: Scalars['String'];
 };
 
 
@@ -46,27 +40,28 @@ export type MutationSignUpArgs = {
 export type Organization = {
   __typename?: 'Organization';
   id: Scalars['ID'];
+  members: Array<User>;
   name: Scalars['String'];
 };
 
 export type Query = {
   __typename?: 'Query';
   authToken: Scalars['String'];
+  getUsersReportingTo?: Maybe<Array<User>>;
   organization: Organization;
   user: User;
 };
+
+export enum Role {
+  Admin = 'ADMIN',
+  User = 'USER'
+}
 
 export type SignUpInput = {
   organizationName: Scalars['String'];
   userEmail: Scalars['String'];
   userName: Scalars['String'];
   userPassword: Scalars['String'];
-};
-
-export type SignUpResponse = {
-  __typename?: 'SignUpResponse';
-  authToken: Scalars['String'];
-  user: User;
 };
 
 export type Team = {
@@ -80,6 +75,8 @@ export type User = {
   email: Scalars['String'];
   id: Scalars['ID'];
   name: Scalars['String'];
+  reportsTo?: Maybe<Scalars['ID']>;
+  role: Role;
 };
 
 export type LogInMutationVariables = Exact<{
@@ -87,7 +84,7 @@ export type LogInMutationVariables = Exact<{
 }>;
 
 
-export type LogInMutation = { __typename?: 'Mutation', logIn: { __typename?: 'LogInResponse', authToken: string, user: { __typename?: 'User', id: string, email: string } } };
+export type LogInMutation = { __typename?: 'Mutation', logIn: string };
 
 export type LogOutMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -99,7 +96,7 @@ export type SignUpMutationVariables = Exact<{
 }>;
 
 
-export type SignUpMutation = { __typename?: 'Mutation', signUp: { __typename?: 'SignUpResponse', authToken: string, user: { __typename?: 'User', id: string, email: string } } };
+export type SignUpMutation = { __typename?: 'Mutation', signUp: string };
 
 export type GetAuthTokenQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -111,6 +108,11 @@ export type GetOrganizationQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type GetOrganizationQuery = { __typename?: 'Query', organization: { __typename?: 'Organization', name: string } };
 
+export type GetOrganizationAndMembersQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetOrganizationAndMembersQuery = { __typename?: 'Query', organization: { __typename?: 'Organization', name: string, members: Array<{ __typename?: 'User', id: string, name: string, role: Role, email: string, reportsTo?: string | null }> } };
+
 export type GetUserQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -119,13 +121,7 @@ export type GetUserQuery = { __typename?: 'Query', user: { __typename?: 'User', 
 
 export const LogInDocument = gql`
     mutation LogIn($input: LogInInput!) {
-  logIn(input: $input) {
-    user {
-      id
-      email
-    }
-    authToken
-  }
+  logIn(input: $input)
 }
     `;
 export type LogInMutationFn = Apollo.MutationFunction<LogInMutation, LogInMutationVariables>;
@@ -186,13 +182,7 @@ export type LogOutMutationResult = Apollo.MutationResult<LogOutMutation>;
 export type LogOutMutationOptions = Apollo.BaseMutationOptions<LogOutMutation, LogOutMutationVariables>;
 export const SignUpDocument = gql`
     mutation SignUp($input: SignUpInput!) {
-  signUp(input: $input) {
-    user {
-      id
-      email
-    }
-    authToken
-  }
+  signUp(input: $input)
 }
     `;
 export type SignUpMutationFn = Apollo.MutationFunction<SignUpMutation, SignUpMutationVariables>;
@@ -287,6 +277,47 @@ export function useGetOrganizationLazyQuery(baseOptions?: Apollo.LazyQueryHookOp
 export type GetOrganizationQueryHookResult = ReturnType<typeof useGetOrganizationQuery>;
 export type GetOrganizationLazyQueryHookResult = ReturnType<typeof useGetOrganizationLazyQuery>;
 export type GetOrganizationQueryResult = Apollo.QueryResult<GetOrganizationQuery, GetOrganizationQueryVariables>;
+export const GetOrganizationAndMembersDocument = gql`
+    query GetOrganizationAndMembers {
+  organization {
+    name
+    members {
+      id
+      name
+      role
+      email
+      reportsTo
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetOrganizationAndMembersQuery__
+ *
+ * To run a query within a React component, call `useGetOrganizationAndMembersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetOrganizationAndMembersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetOrganizationAndMembersQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetOrganizationAndMembersQuery(baseOptions?: Apollo.QueryHookOptions<GetOrganizationAndMembersQuery, GetOrganizationAndMembersQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetOrganizationAndMembersQuery, GetOrganizationAndMembersQueryVariables>(GetOrganizationAndMembersDocument, options);
+      }
+export function useGetOrganizationAndMembersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetOrganizationAndMembersQuery, GetOrganizationAndMembersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetOrganizationAndMembersQuery, GetOrganizationAndMembersQueryVariables>(GetOrganizationAndMembersDocument, options);
+        }
+export type GetOrganizationAndMembersQueryHookResult = ReturnType<typeof useGetOrganizationAndMembersQuery>;
+export type GetOrganizationAndMembersLazyQueryHookResult = ReturnType<typeof useGetOrganizationAndMembersLazyQuery>;
+export type GetOrganizationAndMembersQueryResult = Apollo.QueryResult<GetOrganizationAndMembersQuery, GetOrganizationAndMembersQueryVariables>;
 export const GetUserDocument = gql`
     query GetUser {
   user {

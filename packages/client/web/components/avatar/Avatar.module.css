@@ -1,7 +1,7 @@
 .avatar {
     width: var(--space-m);
     height: var(--space-m);
-    background-color: grey;
+    background-color: var(--color-text);
     line-height: var(--space-m);
     text-align: center;
     text-transform: uppercase;

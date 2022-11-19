@@ -17,9 +17,23 @@ func (r *queryResolver) User(ctx context.Context) (*model.User, error) {
 		return nil, err
 	}
 
-	return &model.User{
-		ID:    user.ID,
-		Name:  user.Name,
-		Email: user.Email,
-	}, nil
+	return user.ToModel(), nil
+}
+
+func (r *queryResolver) GetUsersReportingTo(ctx context.Context) ([]*model.User, error) {
+	if !utils.IsAuthenticated(ctx) {
+		return nil, errors.New(utils.ErrorNoAccess)
+	}
+
+	users, err := r.Service.GetUsersReportingTo(ctx, utils.ContextUserID(ctx))
+	if err != nil {
+		return nil, err
+	}
+
+	var modelUsers []*model.User
+	for _, user := range users {
+		modelUsers = append(modelUsers, user.ToModel())
+	}
+
+	return modelUsers, nil
 }

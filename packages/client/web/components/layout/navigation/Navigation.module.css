@@ -35,7 +35,7 @@
 }
 
 .menuItem.hasNotifications {
-    background-color: var(--color-black-accent);
+    background-color: var(--color-background-accent);
 }
 
 .menuItem:hover, .menuItem.hasNotifications:hover {

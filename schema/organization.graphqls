@@ -1,6 +1,7 @@
 type Organization {
     id: ID!
     name: String!
+    members: [User!]!
 }
 
 extend type Query {

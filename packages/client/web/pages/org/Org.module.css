@@ -1,0 +1,44 @@
+.header {
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+}
+
+.member {
+    margin-bottom: var(--space-m);
+    display: grid;
+    grid-template-columns: 4fr 1fr 1fr;
+    gap: var(--space-s);
+}
+
+.member .name {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: var(--space-s);
+}
+
+.member .avatar {
+    margin-right: var(--space-xs);
+}
+
+.member .email {
+    font-size: var(--text-size-small);
+}
+
+.settings {
+    display: flex;
+    flex-direction: row;
+}
+
+.setting {
+    font-size: var(--text-size-small);
+    display: flex;
+    flex-direction: column;
+}
+
+.setting select {
+    margin-top: var(--space-xs);
+    width: 100%;
+}

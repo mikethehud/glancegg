@@ -11,7 +11,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { useLogInMutation } from "../../lib/graphql/generated/generated";
 import { FormError } from "../../components/formError/FormError";
 import { useRouter } from "next/router";
-import { getToken } from "../../lib/jwt/jwt";
+import { getToken, storeToken } from "../../lib/jwt/jwt";
 import { LayoutPublic } from "../../components/layout/LayoutPublic";
 
 type Inputs = {
@@ -66,6 +66,7 @@ const Login: NextPage = () => {
     }
 
     if (data) {
+        storeToken(data.logIn) // store auth token
         doRedirect()
     }
 

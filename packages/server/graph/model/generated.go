@@ -2,19 +2,21 @@
 
 package model
 
+import (
+	"fmt"
+	"io"
+	"strconv"
+)
+
 type LogInInput struct {
 	UserEmail    string `json:"userEmail"`
 	UserPassword string `json:"userPassword"`
 }
 
-type LogInResponse struct {
-	User      *User  `json:"user"`
-	AuthToken string `json:"authToken"`
-}
-
 type Organization struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID      string  `json:"id"`
+	Name    string  `json:"name"`
+	Members []*User `json:"members"`
 }
 
 type SignUpInput struct {
@@ -24,18 +26,56 @@ type SignUpInput struct {
 	UserPassword     string `json:"userPassword"`
 }
 
-type SignUpResponse struct {
-	User      *User  `json:"user"`
-	AuthToken string `json:"authToken"`
-}
-
 type Team struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
 }
 
 type User struct {
-	ID    string `json:"id"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
+	ID        string  `json:"id"`
+	Name      string  `json:"name"`
+	Email     string  `json:"email"`
+	ReportsTo *string `json:"reportsTo"`
+	Role      Role    `json:"role"`
+}
+
+type Role string
+
+const (
+	RoleAdmin Role = "ADMIN"
+	RoleUser  Role = "USER"
+)
+
+var AllRole = []Role{
+	RoleAdmin,
+	RoleUser,
+}
+
+func (e Role) IsValid() bool {
+	switch e {
+	case RoleAdmin, RoleUser:
+		return true
+	}
+	return false
+}
+
+func (e Role) String() string {
+	return string(e)
+}
+
+func (e *Role) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = Role(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Role", str)
+	}
+	return nil
+}
+
+func (e Role) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }

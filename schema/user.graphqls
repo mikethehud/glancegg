@@ -1,9 +1,17 @@
+enum Role {
+    ADMIN
+    USER
+}
+
 type User {
     id: ID!
     name: String!
     email: String!
+    reportsTo: ID
+    role: Role!
 }
 
 extend type Query {
     user: User!
+    getUsersReportingTo: [User!]
 }

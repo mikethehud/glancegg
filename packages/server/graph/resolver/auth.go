@@ -8,59 +8,45 @@ import (
 )
 
 // SignUp lets a user create a new org + user
-func (r *mutationResolver) SignUp(ctx context.Context, input model.SignUpInput) (*model.SignUpResponse, error) {
+func (r *mutationResolver) SignUp(ctx context.Context, input model.SignUpInput) (string, error) {
 	u, _, err := r.Service.SignUpWithPassword(ctx, input.OrganizationName, input.UserName, input.UserEmail, input.UserPassword)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	authToken, refreshToken, err := utils.GenerateTokens(u)
 	if err != nil {
-		return nil, utils.InternalError(r.Service.Logger, err, "error generating tokens")
+		return "", utils.InternalError(r.Service.Logger, err, "error generating tokens")
 	}
 
 	// set refresh token cookie
 	err = utils.SetRefreshToken(ctx, refreshToken)
 	if err != nil {
-		return nil, errors.Wrap(err, "errors setting refresh token")
+		return "", errors.Wrap(err, "errors setting refresh token")
 	}
 
-	return &model.SignUpResponse{
-		User: &model.User{
-			ID:    u.ID,
-			Name:  u.Name,
-			Email: u.Email,
-		},
-		AuthToken: authToken,
-	}, nil
+	return authToken, nil
 }
 
 // LogIn lets a user log in and returns a JWT
-func (r *mutationResolver) LogIn(ctx context.Context, input model.LogInInput) (*model.LogInResponse, error) {
+func (r *mutationResolver) LogIn(ctx context.Context, input model.LogInInput) (string, error) {
 	u, err := r.Service.LogInWithPassword(ctx, input.UserEmail, input.UserPassword)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	authToken, refreshToken, err := utils.GenerateTokens(u)
 	if err != nil {
-		return nil, utils.InternalError(r.Service.Logger, err, "error generating tokens")
+		return "", utils.InternalError(r.Service.Logger, err, "error generating tokens")
 	}
 
 	// set refresh token cookie
 	err = utils.SetRefreshToken(ctx, refreshToken)
 	if err != nil {
-		return nil, errors.Wrap(err, "errors setting refresh token")
+		return "", errors.Wrap(err, "errors setting refresh token")
 	}
 
-	return &model.LogInResponse{
-		User: &model.User{
-			ID:    u.ID,
-			Name:  u.Name,
-			Email: u.Email,
-		},
-		AuthToken: authToken,
-	}, nil
+	return authToken, nil
 }
 
 func (r *queryResolver) AuthToken(ctx context.Context) (string, error) {

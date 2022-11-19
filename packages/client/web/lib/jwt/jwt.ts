@@ -1,12 +1,13 @@
 import { clientNoAuth } from "../clients/apolloClient"
 import jwtDecode, { JwtPayload } from "jwt-decode";
-import { GetAuthTokenDocument, GetAuthTokenQuery } from "../graphql/generated/generated";
+import { GetAuthTokenDocument, GetAuthTokenQuery, Role } from "../graphql/generated/generated";
 
 const jwtKey = "mf-jwt"
 
 interface JwtData extends JwtPayload {
     userID: string,
     organizationID: string,
+    role: string,
 }
 
 export const storeToken = (token: string) => {
@@ -57,6 +58,19 @@ export const getUserIDFromToken = (token: string): string => {
         return jwt.userID
     }
     return ""
+}
+
+export const getRoleFromToken = (token: string): Role => {
+    const jwt = jwtDecode<JwtData>(token)
+    if (jwt.role) {
+        switch(jwt.role) {
+            case "ADMIN":
+                return Role.Admin
+            case "USER":
+                return Role.User
+        }
+    }
+    return Role.User
 }
 
 export const removeToken = () => {

@@ -1,5 +1,6 @@
 .anchor {
     position: relative;
+    z-index: 1;
 }
 
 .wrapper {
@@ -13,6 +14,7 @@
     border-radius: var(--border-radius);
     border-top-right-radius: 0;
     padding: var(--space-xxs) 0;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
 .anchor::before, .anchor::after {
@@ -46,11 +48,15 @@
     width: 100%;
     font-size: var(--text-size-small);
     padding: var(--space-xs) var(--space-s);
-    color: var(--color-text);
+    color: var(--color-white);
 }
 
 .link:hover {
     background-color: var(--color-blue);
+}
+
+.text {
+    background-color: var(--color-gray);
 }
 
 .divider {

@@ -9,16 +9,36 @@
     text-transform: uppercase;
     cursor: pointer;
     position: relative;
+    border-radius: var(--border-radius);
 }
+
+/* types */
 
 .button.primary {
     background-color: var(--color-text);
     color: var(--color-background);
 }
 
+.button.caution {
+    border-color: var(--color-red);
+    color: var(--color-white);
+}
+
+.button.caution.primary {
+    background-color: var(--color-red);
+    color: var(--color-white);
+}
+
+/* sizes */
+
 .button.small {
     padding: var(--space-xs) var(--space-s);
     font-size: var(--text-size-small);
+}
+
+.button.xsmall {
+    padding: var(--space-xxs) var(--space-xs);
+    font-size: var(--text-size-xsmall);
 }
 
 .button:disabled {

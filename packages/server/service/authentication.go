@@ -23,7 +23,7 @@ func (s *Service) SignUpWithPassword(ctx context.Context, orgName, userName, use
 	}
 	orgID, err := queries.CreateOrganization(ctx, tx, s.valid, org)
 	if err != nil {
-		return nil, nil, utils.InternalError(s.Logger, err, "error inserting organisation into db")
+		return nil, nil, utils.InternalError(s.Logger, err, "error inserting organization into db")
 	}
 	org.ID = orgID
 
@@ -33,6 +33,7 @@ func (s *Service) SignUpWithPassword(ctx context.Context, orgName, userName, use
 		Email:          userEmail,
 		OrganizationID: orgID,
 		Password:       userPassword,
+		Role:           types.AdminRole,
 	}
 	err = s.valid.Struct(user)
 	if err != nil {

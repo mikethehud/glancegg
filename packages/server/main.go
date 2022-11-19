@@ -102,7 +102,7 @@ func RunServer(log *logrus.Logger, dbx *sqlx.DB) {
 		AllowCredentials: true,
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	}))
-	r.Use(authTokenMiddleware())
+	r.Use(authTokenMiddleware(log))
 	r.Use(refreshTokenMiddleware())
 	r.Use(cookieWriterMiddleWare())
 
@@ -119,7 +119,7 @@ func RunServer(log *logrus.Logger, dbx *sqlx.DB) {
 	log.Fatal(http.ListenAndServe(":"+graphqlPort, r))
 }
 
-func authTokenMiddleware() func(http.Handler) http.Handler {
+func authTokenMiddleware(log *logrus.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			authToken := r.Header.Get("Authorization")
@@ -131,6 +131,7 @@ func authTokenMiddleware() func(http.Handler) http.Handler {
 
 			claims, err := utils.ParseAuthToken(authToken)
 			if err != nil {
+				log.Error(err)
 				http.Error(w, `{"errors":{"message":"INVALID_AUTH_TOKEN"}}`, http.StatusForbidden)
 				return
 			}

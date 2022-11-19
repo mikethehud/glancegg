@@ -13,10 +13,6 @@ interface UserBadgeProps {
 }
 
 export const UserBadge = ({ name, active, loading, onClick }: UserBadgeProps) => {
-    const getInitial = (name?: string): string => {
-        return name ? name.charAt(0) : ""
-    }
-
     if(loading) {
         return (
             <div className={classNames(styles.userBadge, styles.loading)}>
@@ -30,7 +26,7 @@ export const UserBadge = ({ name, active, loading, onClick }: UserBadgeProps) =>
 
     return (
         <div className={classNames(styles.userBadge, active && styles.active)} onClick={onClick}>
-            <Avatar initial={getInitial(name)} />
+            <Avatar name={name} />
             <FontAwesomeIcon className={styles.chevron} icon={faChevronDown} />
         </div>
     )
