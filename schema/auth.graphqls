@@ -1,13 +1,22 @@
-input SignUpInput {
+input SignUpWithOrgInput {
+    organizationID: String!
+    firstName: String!
+    lastName: String!
+    email: String!
+    password: String!
+}
+
+input SignUpWithoutOrgInput {
     organizationName: String!
-    userName: String!
-    userEmail: String!
-    userPassword: String!
+    firstName: String!
+    lastName: String!
+    email: String!
+    password: String!
 }
 
 input LogInInput {
-    userEmail: String!
-    userPassword: String!
+    email: String!
+    password: String!
 }
 
 extend type Query {
@@ -15,7 +24,8 @@ extend type Query {
 }
 
 extend type Mutation {
-    signUp(input: SignUpInput!): String!
+    signUpWithOrg(input: SignUpWithOrgInput!): String!
+    signUpWithoutOrg(input: SignUpWithoutOrgInput!): String!
     logIn(input: LogInInput!): String!
     logOut: Boolean
 }

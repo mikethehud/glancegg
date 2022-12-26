@@ -1,13 +1,13 @@
 import { NextPage } from "next"
 import { Layout } from "../../components/layout/Layout"
-import { Section } from "../../components/section/Section"
+import { Container } from "../../components/container/Container"
 
 const Home: NextPage = () => {
     return (
         <Layout>
-            <Section size="small">
+            <Container size="small">
                 <h1>Authenticated mate, nice!</h1>
-            </Section>
+            </Container>
         </Layout>
     )
 }

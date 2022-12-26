@@ -1,8 +1,7 @@
 import Image from "next/image"
 import React, { useState } from "react"
-import { Role, useGetOrganizationQuery, User } from "../../../lib/graphql/generated/generated"
+import { Maybe, Organization, User } from "../../../lib/graphql/generated/generated"
 import { useOutsideClickCallback } from "../../../lib/hooks/useOutsideClickCallback"
-import { useRole } from "../../../lib/hooks/useRole"
 import { Avatar } from "../../avatar/Avatar"
 import { Dropdown } from "../../dropdown/Dropdown"
 import { DropdownDivider } from "../../dropdown/DropdownDivider"
@@ -11,29 +10,37 @@ import { UserBadge } from "../../userBadge/UserBadge"
 import styles from "./Navigation.module.css"
 
 interface UserDropdownProps {
-    user?: User
-    loading?: boolean
+    user: User
+    organization?: Maybe<Organization>
 }
 
-export const UserDropdown = ({ user, loading }: UserDropdownProps) => {
+export const UserDropdown = ({ user, organization }: UserDropdownProps) => {
     const [userNavOpen, setUserNavOpen] = useState(false)
     const dropDownRef = React.createRef<HTMLDivElement>()
-    const role = useRole()
-    const { data } = useGetOrganizationQuery()
 
     useOutsideClickCallback(dropDownRef, () => { console.log("clicked somewhere wow"); setUserNavOpen(false); })
 
-    const DropDown = ({ user }: { user: User }) => (
+    const DropDown = () => (
         <Dropdown>
             <DropdownLink href="/profile">
                 Signed in as<br />
-                <b>{user.name}</b>
+                <b>{user.firstName} {user.lastName}</b>
             </DropdownLink>
             <DropdownDivider />
-            <DropdownLink href="/org" className={styles.orgLink}>
-                <Avatar name={data && data.organization.name} />
-                <strong>{data && data.organization.name}</strong>
-            </DropdownLink>
+            {organization
+                ? (
+                    <DropdownLink href="/org" className={styles.orgLink}>
+                        <Avatar name={organization.name} />
+                        <strong>{organization.name}</strong>
+                    </DropdownLink>
+                )
+                : (
+                    <DropdownLink href="/org/create" className={styles.orgLink}>
+                        <Avatar name="?" />
+                        <strong>Create Organization</strong>
+                    </DropdownLink>
+                )
+            }
             <DropdownDivider />
             <DropdownLink href="/logout"><strong>Logout</strong></DropdownLink>
         </Dropdown>
@@ -41,8 +48,14 @@ export const UserDropdown = ({ user, loading }: UserDropdownProps) => {
 
     return (
         <div ref={dropDownRef}>
-            <UserBadge loading={loading} name={user && user.name} active={userNavOpen} onClick={() => setUserNavOpen(!userNavOpen)} />
-            {userNavOpen && user && <DropDown user={user} />}
+            {user && (
+                <UserBadge
+                    user={user}
+                    active={userNavOpen}
+                    onClick={() => setUserNavOpen(!userNavOpen)}
+                />
+            )}
+            {userNavOpen && user && <DropDown />}
         </div>
     )
 }

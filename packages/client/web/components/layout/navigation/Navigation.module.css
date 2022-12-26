@@ -3,7 +3,7 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    margin: var(--space-xl) 0 var(--space-m);
+    margin: var(--space-xl) 0 var(--space-xl);
 }
 
 .logo {
@@ -14,23 +14,24 @@
     display: flex;
     flex-direction: row;
     align-items: center;
+    gap: var(--space-xs);
 }
 
 .menuItem {
     position: relative;
-    font-size: var(--text-size-small);
+    font-size: var(--text-size-s);
     padding: var(--space-xs) var(--space-s);
     cursor: pointer;
     margin-left: var(--space-xxs);
     border-radius: var(--border-radius);
     font-weight: normal;
-    font-family: "Sofia Sans";
+    font-family: var(--font-family);
     text-transform: uppercase;
     font-weight: bold;
 }
 
 .menuItem .icon {
-    font-size: var(--text-size-xsmall);
+    font-size: var(--text-size-xs);
     margin-right: var(--space-xs);
 }
 
@@ -62,7 +63,7 @@
     font-weight: bold;
     line-height: var(--size-badge);
     text-align: center;
-    font-family: "Sofia sans";
+    font-family: var(--font-family);
     top: calc(var(--space-xxs) * -1);
     right: calc(var(--space-xxs) * -1);
     position: absolute;

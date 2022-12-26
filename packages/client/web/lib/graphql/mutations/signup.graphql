@@ -1,3 +1,7 @@
-mutation SignUp($input: SignUpInput!) {
-    signUp(input: $input)
+mutation SignUpWithoutOrg($input: SignUpWithoutOrgInput!) {
+    signUpWithoutOrg(input: $input)
+}
+
+mutation SignUpWithOrg($input: SignUpWithOrgInput!) {
+    signUpWithOrg(input: $input)
 }

@@ -35,14 +35,31 @@ func (r *queryResolver) Organization(ctx context.Context) (*model.Organization, 
 	if !utils.IsAuthenticated(ctx) {
 		return nil, errors.New(utils.ErrorNoAccess)
 	}
+	orgID := utils.ContextOrgID(ctx)
+	if orgID == "" {
+		return nil, nil
+	}
 
 	org, err := r.Service.GetOrganizationByID(ctx, utils.ContextOrgID(ctx))
 	if err != nil {
 		return nil, err
 	}
 
-	return &model.Organization{
+	return org.ToModel(), nil
+}
+
+func (r *queryResolver) OrganizationInfo(ctx context.Context, id string) (*model.OrganizationInfo, error) {
+	org, err := r.Service.GetOrganizationByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.OrganizationInfo{
 		ID:   org.ID,
 		Name: org.Name,
 	}, nil
+}
+
+func (r *mutationResolver) DeleteOrganization(ctx context.Context) (*bool, error) {
+	return nil, r.Service.DeleteOrganization(ctx)
 }

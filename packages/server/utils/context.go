@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+	"github.com/mikethehud/glancegg/packages/server/types"
 )
 
 type contextKey int
@@ -23,11 +24,19 @@ func ContextUserID(ctx context.Context) string {
 }
 
 func ContextOrgID(ctx context.Context) string {
-	orgID := ctx.Value(orgIDContextKey)
-	if orgID != nil {
-		return orgID.(string)
+	orgID, ok := ctx.Value(orgIDContextKey).(*string)
+	if !ok || orgID == nil {
+		return ""
 	}
-	return ""
+	return *orgID
+}
+
+func ContextRole(ctx context.Context) *types.Role {
+	role := ctx.Value(roleContextKey)
+	if role != nil {
+		return role.(*types.Role)
+	}
+	return nil
 }
 
 func ContextRefreshToken(ctx context.Context) string {
@@ -65,4 +74,9 @@ func ContextWithCookieWriter(ctx context.Context, cw *CookieWriter) context.Cont
 
 func IsAuthenticated(ctx context.Context) bool {
 	return ctx.Value(userIDContextKey) != nil && ctx.Value(orgIDContextKey) != nil && ctx.Value(roleContextKey) != nil
+}
+
+func IsAdmin(ctx context.Context) bool {
+	role := ContextRole(ctx)
+	return *role == types.AdminRole
 }

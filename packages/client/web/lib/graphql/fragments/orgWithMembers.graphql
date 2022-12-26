@@ -1,0 +1,7 @@
+fragment OrgWithMembers on Organization {
+    id
+    name
+    members {
+        ...BaseUserData
+    }
+}

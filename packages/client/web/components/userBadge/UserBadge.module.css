@@ -31,5 +31,5 @@
 
 .chevron {
     margin-left: var(--space-xs);
-    font-size: var(--text-size-xsmall);
+    font-size: var(--text-size-xs);
 }

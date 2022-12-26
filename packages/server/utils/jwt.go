@@ -18,7 +18,7 @@ var (
 type AuthClaims struct {
 	UserID string
 	Role   *types.Role
-	OrgID  string
+	OrgID  *string
 }
 
 type RefreshClaims struct {
@@ -63,9 +63,12 @@ func ParseAuthToken(tokenStr string) (*AuthClaims, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "could not parse auth token")
 	}
-
 	userID := claims["userID"].(string)
-	orgID := claims["orgID"].(string)
+	orgID, ok := claims["orgID"].(string)
+	var orgIDPointer *string
+	if ok {
+		orgIDPointer = &orgID
+	}
 	role, err := types.RoleFromString(claims["role"].(string))
 	if err != nil {
 		return nil, errors.Wrap(err, "could not cast role")
@@ -73,7 +76,7 @@ func ParseAuthToken(tokenStr string) (*AuthClaims, error) {
 
 	return &AuthClaims{
 		UserID: userID,
-		OrgID:  orgID,
+		OrgID:  orgIDPointer,
 		Role:   &role,
 	}, nil
 }

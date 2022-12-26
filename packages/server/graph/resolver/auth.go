@@ -3,20 +3,34 @@ package resolver
 import (
 	"context"
 	"github.com/mikethehud/glancegg/packages/server/graph/model"
+	"github.com/mikethehud/glancegg/packages/server/types"
 	"github.com/mikethehud/glancegg/packages/server/utils"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
-// SignUp lets a user create a new org + user
-func (r *mutationResolver) SignUp(ctx context.Context, input model.SignUpInput) (string, error) {
-	u, _, err := r.Service.SignUpWithPassword(ctx, input.OrganizationName, input.UserName, input.UserEmail, input.UserPassword)
+// SignUpWithOrg creates a new user at the existing org
+func (r *mutationResolver) SignUpWithOrg(ctx context.Context, input model.SignUpWithOrgInput) (string, error) {
+	u, err := r.Service.SignUpWithOrg(ctx, &input)
 	if err != nil {
 		return "", err
 	}
+	return returnTokens(ctx, r.Service.Logger, u)
+}
 
-	authToken, refreshToken, err := utils.GenerateTokens(u)
+// SignUpWithoutOrg creates a new user and a new org
+func (r *mutationResolver) SignUpWithoutOrg(ctx context.Context, input model.SignUpWithoutOrgInput) (string, error) {
+	u, err := r.Service.SignUpWithoutOrg(ctx, &input)
 	if err != nil {
-		return "", utils.InternalError(r.Service.Logger, err, "error generating tokens")
+		return "", err
+	}
+	return returnTokens(ctx, r.Service.Logger, u)
+}
+
+func returnTokens(ctx context.Context, logger *logrus.Logger, user *types.User) (string, error) {
+	authToken, refreshToken, err := utils.GenerateTokens(user)
+	if err != nil {
+		return "", utils.InternalError(logger, err, "error generating tokens")
 	}
 
 	// set refresh token cookie
@@ -30,7 +44,7 @@ func (r *mutationResolver) SignUp(ctx context.Context, input model.SignUpInput) 
 
 // LogIn lets a user log in and returns a JWT
 func (r *mutationResolver) LogIn(ctx context.Context, input model.LogInInput) (string, error) {
-	u, err := r.Service.LogInWithPassword(ctx, input.UserEmail, input.UserPassword)
+	u, err := r.Service.LogInWithPassword(ctx, input.Email, input.Password)
 	if err != nil {
 		return "", err
 	}

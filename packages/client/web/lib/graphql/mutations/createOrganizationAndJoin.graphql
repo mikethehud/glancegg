@@ -1,0 +1,9 @@
+mutation CreateOrganizationAndJoin($input:CreateOrganizationAndJoinInput!) {
+    createOrganizationAndJoin(input:$input) {
+        id
+        role
+        organization {
+            ...OrgWithMembers
+        }
+    }
+}

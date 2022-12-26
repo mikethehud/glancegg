@@ -1,0 +1,8 @@
+fragment BaseUserData on User {
+    id
+    firstName
+    lastName
+    email
+    role
+    reportsTo
+}

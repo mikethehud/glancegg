@@ -1,12 +1,5 @@
 query GetOrganizationAndMembers {
     organization {
-        name
-        members {
-            id
-            name
-            role
-            email
-            reportsTo
-        }
+        ...OrgWithMembers
     }
 }

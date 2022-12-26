@@ -2,12 +2,12 @@ import classNames from "classnames"
 import styles from "./Avatar.module.css"
 
 type AvatarProps = {
-    name?: string
+    name: string
     image?: JSX.Element
 } & React.HTMLAttributes<HTMLElement>
 
-const getInitial = (name?: string): string => {
-    return name ? name.charAt(0) : ""
+const getInitial = (name: string): string => {
+    return name.charAt(0)
 }
 
 export const Avatar = ({ name, image, className }: AvatarProps) => (

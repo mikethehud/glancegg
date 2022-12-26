@@ -1,0 +1,5 @@
+mutation RemoveUserFromOrganization($userID: ID!) {
+    removeUserFromOrganization(userID:$userID) {
+        ...OrgWithMembers
+    }
+}

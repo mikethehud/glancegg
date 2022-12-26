@@ -1,0 +1,45 @@
+enum ResponseType {
+    SCALE
+    TASK
+    TEXT
+}
+
+type CheckIn {
+    id: ID!
+    # questions: [Question!]!
+    organization: Organization!
+    user: User!
+    reviewer: User!
+    createdAt: Time!
+}
+
+# type Question {
+#     id: ID!
+#     checkIn: CheckIn!
+#     position: Int!
+#     questionType: String!
+#     text: String!
+#     responseType: ResponseType!
+#     # responses: [Response!]
+# }
+
+# type Response {
+#     id: ID!
+#     position: Int!
+#     response: String!
+#     question: Question!
+#     completedAt: Timestamp
+# }
+
+# extend type Query {
+#     checkIns: [CheckIn!]
+#     # checkInByID(checkInID: ID!): CheckIn!
+# }
+
+input CreateCheckInInput {
+    userID: ID!
+}
+
+extend type Mutation {
+    createCheckIn(input: CreateCheckInInput!): String!
+}

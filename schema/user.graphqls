@@ -5,13 +5,26 @@ enum Role {
 
 type User {
     id: ID!
-    name: String!
+    firstName: String!
+    lastName: String!
     email: String!
     reportsTo: ID
     role: Role!
+    organization: Organization
+}
+
+input UpdateUserPermissionsInput {
+    reportsTo: ID
+    role: ID
 }
 
 extend type Query {
     user: User!
     getUsersReportingTo: [User!]
+}
+
+extend type Mutation {
+    deleteUser: Boolean
+    leaveOrganization: Boolean
+    updateUserPermissions(userID: ID!, input: UpdateUserPermissionsInput!): User!
 }

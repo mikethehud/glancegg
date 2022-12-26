@@ -1,0 +1,10 @@
+/* todo: restyle select to add border */
+.select {
+    --select-border-tb: calc(var(--space-xs) + 1px);
+    --select-border-lr: calc(var(--space-s) + 1px);
+    font-family: var(--font-family);
+    font-size: var(--font-size-small);
+    border: solid transparent;
+    border-width: var(--select-border-tb) var(--select-border-lr);
+    border-radius: var(--border-radius);
+}

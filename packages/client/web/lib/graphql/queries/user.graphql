@@ -1,7 +1,8 @@
 query GetUser {
     user {
-        id
-        name
-        email
+        ...BaseUserData
+        organization {
+            ...OrgWithMembers
+        }
     }
 }

@@ -4,14 +4,15 @@ import { GetAuthTokenDocument, GetAuthTokenQuery, Role } from "../graphql/genera
 
 const jwtKey = "mf-jwt"
 
-interface JwtData extends JwtPayload {
-    userID: string,
-    organizationID: string,
-    role: string,
+export interface TokenData {
+    userID?: string
+    orgID?: string
+    role?: Role
 }
 
+type JwtData = JwtPayload & TokenData
+
 export const storeToken = (token: string) => {
-    console.log("storing token")
     localStorage.setItem(jwtKey, token)
 }
 
@@ -60,20 +61,28 @@ export const getUserIDFromToken = (token: string): string => {
     return ""
 }
 
-export const getRoleFromToken = (token: string): Role => {
+export const getRoleFromToken = (token: string): Role | undefined => {
+    return getDataFromToken(token).role
+}
+
+export const getDataFromToken = (token: string): TokenData => {
     const jwt = jwtDecode<JwtData>(token)
-    if (jwt.role) {
-        switch(jwt.role) {
-            case "ADMIN":
-                return Role.Admin
-            case "USER":
-                return Role.User
-        }
+    return {
+        userID: jwt.userID,
+        orgID: jwt.orgID,
+        role: stringToRole(jwt.role)
     }
-    return Role.User
+}
+
+const stringToRole = (s: string): Role | undefined=> {
+    switch(s) {
+        case "ADMIN":
+            return Role.Admin
+        case "USER":
+            return Role.User
+    }
 }
 
 export const removeToken = () => {
-    console.log("removing token")
     return localStorage.removeItem(jwtKey)
 }

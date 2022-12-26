@@ -1,11 +1,11 @@
 .button {
     background-color: var(--color-background);
     color: var(--color-text);
-    border: 2px solid var(--color-text);
+    border: var(--border-width) solid var(--color-text);
     padding: var(--space-s) var(--space-m);
     font-weight: bold;
-    font-size: var(--text-size-regular);
-    font-family: "Sofia Sans";
+    font-size: var(--text-size-m);
+    font-family: var(--font-family);
     text-transform: uppercase;
     cursor: pointer;
     position: relative;
@@ -29,16 +29,46 @@
     color: var(--color-white);
 }
 
+.button.do {
+    border-color: var(--color-green);
+    color: var(--color-green);
+}
+
+.button.do.button.primary {
+    background-color: var(--color-green);
+    color: var(--color-white);
+}
+
+.button:disabled {
+    opacity: 0.3 !important;
+    background-color: var(--color-gray) !important;
+    border-color: var(--color-gray) !important;
+}
+
 /* sizes */
 
 .button.small {
     padding: var(--space-xs) var(--space-s);
-    font-size: var(--text-size-small);
+    font-size: var(--text-size-s);
+}
+
+.button.small .icon {
+    font-size: var(--text-size-s);
+    margin-right: var(--space-s);
 }
 
 .button.xsmall {
     padding: var(--space-xxs) var(--space-xs);
-    font-size: var(--text-size-xsmall);
+    font-size: var(--text-size-xs);
+}
+
+.button.xsmall .icon {
+    font-size: var(--text-size-xs);
+    margin-right: var(--space-xs);
+}
+
+.iconButton .icon {
+    margin-right: 0 !important;
 }
 
 .button:disabled {
@@ -48,5 +78,10 @@
 
 .button > svg {
     margin-right: var(--space-s);
-    font-size: var(--text-size-regular);
+    font-size: var(--text-size-m);
+}
+
+.button.block {
+    display: block;
+    width: 100%;
 }

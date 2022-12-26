@@ -1,0 +1,44 @@
+.wrapper {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    background-color: rgba(0,0,0,0.75);
+    z-index: 999;
+}
+
+.container {
+    --dialog-container-width: 600px;
+    background-color: var(--color-background);
+    position: absolute;
+    width: var(--dialog-container-width);
+    height: var(--dialog-container-height);
+    left: 50%;
+    top: 50%;
+    margin-left: calc(var(--dialog-container-width) / -2);
+    margin-top: calc(var(--dialog-container-width) / -2);
+    padding: var(--space-l);
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    border-radius: var(--border-radius);
+}
+
+.title {
+    font-size: var(--text-size-l);
+    font-weight: bold;
+}
+
+.content {
+    margin: var(--space-l) 0;
+}
+
+.buttons {
+    display: flex;
+    gap: var(--space-s);
+}
+
+.confirmDialog .buttons {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+}

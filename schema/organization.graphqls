@@ -4,6 +4,22 @@ type Organization {
     members: [User!]!
 }
 
+type OrganizationInfo {
+    id: ID!
+    name: String!
+}
+
+input CreateOrganizationAndJoinInput {
+    name: String!
+}
+
 extend type Query {
-    organization: Organization!
+    organization: Organization
+    organizationInfo(id: String!): OrganizationInfo!
+}
+
+extend type Mutation {
+    createOrganizationAndJoin(input: CreateOrganizationAndJoinInput!): User!
+    removeUserFromOrganization(userID: ID!): Organization!
+    deleteOrganization: Boolean
 }

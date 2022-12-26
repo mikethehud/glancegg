@@ -6,11 +6,28 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"time"
 )
 
+type CheckIn struct {
+	ID           string        `json:"id"`
+	Organization *Organization `json:"organization"`
+	User         *User         `json:"user"`
+	Reviewer     *User         `json:"reviewer"`
+	CreatedAt    time.Time     `json:"createdAt"`
+}
+
+type CreateCheckInInput struct {
+	UserID string `json:"userID"`
+}
+
+type CreateOrganizationAndJoinInput struct {
+	Name string `json:"name"`
+}
+
 type LogInInput struct {
-	UserEmail    string `json:"userEmail"`
-	UserPassword string `json:"userPassword"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type Organization struct {
@@ -19,11 +36,25 @@ type Organization struct {
 	Members []*User `json:"members"`
 }
 
-type SignUpInput struct {
+type OrganizationInfo struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+type SignUpWithOrgInput struct {
+	OrganizationID string `json:"organizationID"`
+	FirstName      string `json:"firstName"`
+	LastName       string `json:"lastName"`
+	Email          string `json:"email"`
+	Password       string `json:"password"`
+}
+
+type SignUpWithoutOrgInput struct {
 	OrganizationName string `json:"organizationName"`
-	UserName         string `json:"userName"`
-	UserEmail        string `json:"userEmail"`
-	UserPassword     string `json:"userPassword"`
+	FirstName        string `json:"firstName"`
+	LastName         string `json:"lastName"`
+	Email            string `json:"email"`
+	Password         string `json:"password"`
 }
 
 type Team struct {
@@ -31,12 +62,62 @@ type Team struct {
 	Name string `json:"name"`
 }
 
-type User struct {
-	ID        string  `json:"id"`
-	Name      string  `json:"name"`
-	Email     string  `json:"email"`
+type UpdateUserPermissionsInput struct {
 	ReportsTo *string `json:"reportsTo"`
-	Role      Role    `json:"role"`
+	Role      *string `json:"role"`
+}
+
+type User struct {
+	ID           string        `json:"id"`
+	FirstName    string        `json:"firstName"`
+	LastName     string        `json:"lastName"`
+	Email        string        `json:"email"`
+	ReportsTo    *string       `json:"reportsTo"`
+	Role         Role          `json:"role"`
+	Organization *Organization `json:"organization"`
+}
+
+type ResponseType string
+
+const (
+	ResponseTypeScale ResponseType = "SCALE"
+	ResponseTypeTask  ResponseType = "TASK"
+	ResponseTypeText  ResponseType = "TEXT"
+)
+
+var AllResponseType = []ResponseType{
+	ResponseTypeScale,
+	ResponseTypeTask,
+	ResponseTypeText,
+}
+
+func (e ResponseType) IsValid() bool {
+	switch e {
+	case ResponseTypeScale, ResponseTypeTask, ResponseTypeText:
+		return true
+	}
+	return false
+}
+
+func (e ResponseType) String() string {
+	return string(e)
+}
+
+func (e *ResponseType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ResponseType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ResponseType", str)
+	}
+	return nil
+}
+
+func (e ResponseType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 type Role string

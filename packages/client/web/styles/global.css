@@ -1,24 +1,26 @@
 @import url('./fonts.css');
 
 :root {
-  --color-black: #222;
-  --color-black-accent: #333;
+  --color-black: #432359;
+  --color-black-accent: #5E2D73;
   --color-white: #fff;
   --color-white-accent: #ebebeb;
   --color-yellow: #00ff47;
   --color-blue: #0077ff;
-  --color-gray: #585562;
-  --color-red: #D62828;
+  --color-gray: #7c508f;
+  --color-red: #ee5949;
+  --color-green: #bdbd7d;
 
   --color-background: var(--color-black);
   --color-background-accent: var(--color-black-accent);
   --color-text: var(--color-white);
   --color-link: var(--color-blue);
 
-  --text-size-big: 32px;
-  --text-size-regular: 24px;
-  --text-size-small: 16px;
-  --text-size-xsmall: 12px;
+  --text-size-xl: 32px;
+  --text-size-l: 26px;
+  --text-size-m: 20px;
+  --text-size-s: 16px;
+  --text-size-xs: 12px;
 
   --space-unit: 4px;
   --space-xxs: calc(1 * var(--space-unit));
@@ -30,6 +32,11 @@
   --space-xxl: calc(21 * var(--space-unit));
 
   --border-radius: 4px;
+  --border-width: 2px;
+
+  --shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+
+  --font-family: "Sofia Sans";
 }
 
 html,
@@ -41,8 +48,9 @@ body,
   height: 100%;
   color: var(--color-text);
   background-color: var(--color-background);
-  font-size: var(--text-size-regular);
-  font-family: "Sofia Sans";
+  font-size: var(--text-size-m);
+  font-family: var(--font-family);
+  font-weight: 100;
 }
 
 a {
@@ -50,10 +58,16 @@ a {
   text-decoration: none;
 }
 
+h1, h2, h3, h4, h5 {
+  margin: 0;
+}
+
 h1 {
-  font-size: var(--text-size-big);
-  margin-block-start: .5em;
-  margin-block-end: .5em;
+  font-size: var(--text-size-xl);
+}
+
+h2 {
+  font-size: var(--text-size-l);
 }
 
 p {
@@ -67,5 +81,5 @@ p {
 }
 
 .text-small {
-  font-size: var(--text-size-small)
+  font-size: var(--text-size-s)
 }

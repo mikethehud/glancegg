@@ -6,7 +6,6 @@
 .inner {
     display: flex;
     flex-direction: column;
-    padding: var(--space-s) 0;
 }
 
 .formElement label {

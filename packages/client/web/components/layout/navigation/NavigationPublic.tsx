@@ -13,8 +13,9 @@ export const NavigationPublic = () => (
                 </a>
         </Link>
         <div className={styles.right}>
-            <Button primary small>Sign Up</Button>
-            &nbsp;
+            <Link href="/signup">
+                <Button primary small>Create Account</Button>
+            </Link>
             <Link href="/login">
                 <Button small>Log In</Button>
             </Link>

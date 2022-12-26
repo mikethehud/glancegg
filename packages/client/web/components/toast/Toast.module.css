@@ -1,0 +1,29 @@
+.toast {
+    width: 500px;
+    padding: var(--space-s);
+    position: fixed;
+    top: 0px;
+    margin-left: -250px;
+    left: 50%;
+    z-index: 999;
+    font-size: var(--text-size-s);
+    opacity: 0;
+    transition: top .3s ease-out, opacity .3s ease-out;
+    box-shadow: var(--shadow);
+    text-align: center;
+}
+
+.toast.success {
+    background-color: var(--color-green);
+    color: var(--color-text);
+}
+
+.toast.animateEnter {
+    top: var(--space-m);
+    opacity: 1;
+}
+
+.toast.animateExit {
+    top: 0;
+    opacity: 0;
+}

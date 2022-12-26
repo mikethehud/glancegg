@@ -7,6 +7,6 @@
     text-transform: uppercase;
     font-weight: bold;
     color: var(--color-background);
-    font-size: var(--text-size-small);
+    font-size: var(--text-size-s);
     position: relative;
 }

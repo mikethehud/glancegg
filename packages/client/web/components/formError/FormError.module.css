@@ -1,6 +1,6 @@
 .formError {
     padding: var(--space-s);
-    font-size: var(--text-size-small);
+    font-size: var(--text-size-s);
     background-color: red;
     color: var(--color-text);
     width: 100%;

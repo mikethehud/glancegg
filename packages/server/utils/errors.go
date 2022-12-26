@@ -13,10 +13,15 @@ const (
 	ErrorAuthUserNotUnique = "USER_NOT_UNIQUE"
 	ErrorAuthNoUser        = "USER_DOESNT_EXIST"
 	ErrorAuthWrongPassword = "WRONG_PASSWORD"
+
+	ErrorOrgLastAdmin = "LAST_ADMIN"
 )
 
 // InternalError logs the error and message, then returns a generic ErrorInternal
 func InternalError(log *logrus.Logger, err error, msg string) error {
-	log.Error(errors.Wrap(err, msg))
-	return errors.New(ErrorInternal)
+	if err != nil {
+		log.Error(errors.Wrap(err, msg))
+		return errors.New(ErrorInternal)
+	}
+	return nil
 }

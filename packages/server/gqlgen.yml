@@ -18,7 +18,14 @@ models:
       - github.com/99designs/gqlgen/graphql.Int
       - github.com/99designs/gqlgen/graphql.Int64
       - github.com/99designs/gqlgen/graphql.Int32
+  Time:
+    model:
+      - github.com/99designs/gqlgen/graphql.Time
   Organization:
     fields:
       members:
+        resolver: true
+  User:
+    fields:
+      organization:
         resolver: true

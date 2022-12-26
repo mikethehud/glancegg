@@ -2,12 +2,11 @@ package queries
 
 import (
 	"context"
-	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/mikethehud/glancegg/packages/server/types"
 )
 
-func CreateOrganization(ctx context.Context, q QueryRunner, val *validator.Validate, org *types.Organization) (string, error) {
+func CreateOrganization(ctx context.Context, q QueryRunner, org types.Organization) (string, error) {
 	query := `
 		INSERT INTO organizations (id, name)
 		VALUES (:id, :name)
@@ -33,4 +32,28 @@ func GetOrganizationByID(ctx context.Context, q QueryRunner, orgID string) (*typ
 		return nil, err
 	}
 	return org, nil
+}
+
+func GetOrganizationByUserID(ctx context.Context, q QueryRunner, userID string) (*types.Organization, error) {
+	query := `
+		SELECT * FROM organizations
+		WHERE id = (SELECT organization_id FROM users WHERE id = $1)
+	`
+	org := &types.Organization{}
+	err := q.GetContext(ctx, org, query, userID)
+
+	if err != nil {
+		return nil, err
+	}
+	return org, nil
+}
+
+func DeleteOrganization(ctx context.Context, q QueryRunner, orgID string) error {
+	query := `
+		DELETE FROM organizations WHERE id = $1
+
+	`
+
+	_, err := q.ExecContext(ctx, query, orgID)
+	return err
 }

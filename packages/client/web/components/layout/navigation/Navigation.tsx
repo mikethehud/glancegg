@@ -3,11 +3,10 @@ import styles from "./Navigation.module.css"
 import Link from "next/link";
 import { UserDropdown } from "./UserDropdown";
 import { Logo } from "./Logo";
-import { useGetUserQuery } from "../../../lib/graphql/generated/generated";
+import { User } from "../../../lib/graphql/generated/generated";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBell, faCheckToSlot, faHandBackFist } from "@fortawesome/free-solid-svg-icons";
+import { faCheckToSlot, faHandBackFist } from "@fortawesome/free-solid-svg-icons";
 import classNames from "classnames";
-import { UrlObject } from "url";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { useRouter } from "next/router";
 
@@ -36,8 +35,11 @@ const MenuItem = ({ icon, href, currentPath, notifications, children }: MenuItem
     )
 }
 
-export const Navigation = () => {
-    const { data, loading, error } = useGetUserQuery()
+interface NavigationProps {
+    user: User
+}
+
+export const Navigation = ({ user }: NavigationProps) => {
     const { asPath } = useRouter()
 
     return (
@@ -51,7 +53,7 @@ export const Navigation = () => {
                 <MenuItem currentPath={asPath} href="/checkins" icon={faCheckToSlot}>Check Ins</MenuItem>
                 <MenuItem currentPath={asPath} href="/reports" icon={faHandBackFist}>Fistbumps</MenuItem>
                 <div className={styles.divider} />
-                <UserDropdown user={data?.user} loading={loading} />
+                <UserDropdown user={user} organization={user.organization} />
             </div>
         </div>
     )

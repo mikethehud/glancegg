@@ -4,8 +4,6 @@ import { Role } from "../graphql/generated/generated";
 import { getRoleFromToken, getToken } from "../jwt/jwt";
 
 export const useRole = (): Role | undefined => {
-    // todo: find better way to grab role
-    const router = useRouter()
     const [role, setRole] = useState<Role>()
 
     useEffect(() => {

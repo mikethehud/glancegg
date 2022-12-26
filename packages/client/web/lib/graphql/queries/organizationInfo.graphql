@@ -1,0 +1,6 @@
+query GetOrganizationInfo($orgID: String!) {
+    organizationInfo(id: $orgID) {
+        id
+        name
+    }
+}

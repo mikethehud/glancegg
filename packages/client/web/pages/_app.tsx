@@ -8,11 +8,14 @@ import React from 'react'
 config.autoAddCss = false
 
 import { client } from '../lib/clients/apolloClient'
+import { ToastProvider } from '../lib/context/toastContext';
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <ApolloProvider client={client}>
-      <Component {...pageProps} />
+      <ToastProvider>
+        <Component {...pageProps} />
+      </ToastProvider>
     </ApolloProvider>
   )
 }

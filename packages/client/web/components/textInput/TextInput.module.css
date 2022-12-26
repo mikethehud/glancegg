@@ -1,11 +1,20 @@
 .textInput {
-    background-color: var(--color-gray);
-    padding: var(--space-s) var(--space-m);
+    background-color: var(--color-background-accent);
+    padding: var(--space-s) var(--space-s);
     border: 1px solid var(--color-gray);
     border-radius: var(--border-radius);
-    font-size: var(--text-size-regular);
-    font-family: "Sofia Sans";
+    font-size: var(--text-size-m);
+    font-family: var(--font-family);
     color: var(--color-text);
+    display: block;
+}
+
+.textInput::placeholder {
+    color: var(--color-gray);
+}
+
+.textInput.block {
+    width: 100%;
     display: block;
 }
 
@@ -15,6 +24,6 @@
 
 .errorMessage {
     color: red;
-    font-size: var(--text-size-small);
+    font-size: var(--text-size-s);
     padding-top: var(--space-xs);
 }

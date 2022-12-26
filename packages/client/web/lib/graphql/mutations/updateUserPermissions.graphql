@@ -1,0 +1,7 @@
+mutation UpdateUserPermissions($userID: ID!, $input: UpdateUserPermissionsInput!) {
+    updateUserPermissions(userID:$userID, input:$input) {
+        id
+        role
+        reportsTo
+    }
+}

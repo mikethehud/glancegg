@@ -1,0 +1,9 @@
+.section {
+    padding: var(--space-s) 0;
+}
+
+.split {
+    display: grid;
+    gap: 0 var(--space-l);
+    grid-template-columns: 1fr 1fr;
+}

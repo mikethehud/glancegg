@@ -4,14 +4,16 @@ import styles from "./TextInput.module.css"
 
 type TextInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
     error?: string;
+    block?: boolean;
 }
 
 export const TextInput = React.forwardRef<HTMLInputElement, TextInputProps>(
-    ({ error, ...attributes }, forwardRef) => (
+    ({ error, block, ...attributes }, forwardRef) => (
         <>
             <input
                 className={classNames(styles.textInput, {
-                    [styles.error]: error
+                    [styles.error]: error,
+                    [styles.block]: block,
                 })}
                 {...attributes}
                 ref={forwardRef}

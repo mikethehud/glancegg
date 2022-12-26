@@ -36,10 +36,11 @@ func RoleFromString(s string) (Role, error) {
 
 type User struct {
 	ID             string     `db:"id"`
-	Name           string     `db:"name" validate:"required,gte=2"`
+	FirstName      string     `db:"first_name" validate:"required,gte=2"`
+	LastName       string     `db:"last_name" validate:"required,gte=2"`
 	Email          string     `db:"email" validate:"required,email"`
 	CreatedAt      *time.Time `db:"created_at"`
-	OrganizationID string     `db:"organization_id" validate:"required,uuid4"`
+	OrganizationID *string    `db:"organization_id" validate:"required,uuid4"`
 	Password       string     `db:"password" validate:"gte=8"'`
 	ReportsTo      *string    `db:"reports_to"`
 	Role           Role       `db:"role"`
@@ -48,7 +49,8 @@ type User struct {
 func (user *User) ToModel() *model.User {
 	return &model.User{
 		ID:        user.ID,
-		Name:      user.Name,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
 		Email:     user.Email,
 		ReportsTo: user.ReportsTo,
 		Role:      user.Role.ToModel(),

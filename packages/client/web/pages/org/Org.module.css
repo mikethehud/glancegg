@@ -5,11 +5,24 @@
     justify-content: space-between;
 }
 
-.member {
-    margin-bottom: var(--space-m);
-    display: grid;
-    grid-template-columns: 4fr 1fr 1fr;
+.members {
+    display: flex;
+    flex-direction: column;
     gap: var(--space-s);
+}
+
+.member {
+    display: flex;
+    flex-direction: row;
+    gap: var(--space-s);
+    justify-content: space-between;
+    align-items: center;
+}
+
+.member.dirty {
+    margin-bottom: 0;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
 }
 
 .member .name {
@@ -24,21 +37,75 @@
 }
 
 .member .email {
-    font-size: var(--text-size-small);
+    font-size: var(--text-size-s);
+}
+
+.member .data {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-items: center;
 }
 
 .settings {
     display: flex;
     flex-direction: row;
+    align-items: flex-end;
+    gap: var(--space-s);
 }
 
 .setting {
-    font-size: var(--text-size-small);
+    font-size: var(--text-size-s);
     display: flex;
     flex-direction: column;
+    position: relative;
 }
 
-.setting select {
+.setting.reportsTo {
+    width: 200px;
+}
+
+.setting.role {
+    width: 100px;
+}
+
+.settingContent {
+    position: relative;
     margin-top: var(--space-xs);
+}
+
+.settingContent select {
     width: 100%;
+    font-size: var(--text-size-s);
+}
+
+.settingSpinner {
+    position: absolute;
+    width: 100%;
+    height: calc(100% - var(--space-xs));
+    bottom: 0;
+    border-radius: var(--border-radius);
+    background-color: var(--color-gray);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.inviteButtons {
+    display: grid;
+    grid-template-columns: auto 150px;
+    gap: var(--space-s);
+}
+
+.confirmButtons {
+    top: 0;
+    right: 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: var(--space-xs);
+    padding: var(--space-xs);
+    border-bottom-right-radius: var(--border-radius);
+    border-bottom-left-radius: var(--border-radius);
+    background-color: var(--color-gray);
 }
