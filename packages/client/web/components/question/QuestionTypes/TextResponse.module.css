@@ -1,0 +1,30 @@
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.response {
+    border: 2px solid var(--color-gray);
+    border-radius: var(--border-radius);
+    padding: var(--size-xs) var(--size-s);
+    display: grid;
+
+    grid-template-columns: 1fr 50px;
+}
+
+.response input {
+    border: 0;
+}
+
+.remove {
+    background-color: transparent;
+    border: 0;
+    cursor: pointer;
+    color: var(--color-text);
+    font-size: var(--text-size-xs);
+}
+
+.remove:hover {
+    background-color: var(--color-gray);
+}

@@ -1,0 +1,12 @@
+query GetCheckIns {
+    checkIns {
+        id
+        createdAt
+        completedAt
+        reviewedAt
+        user {
+            firstName
+            lastName
+        }
+    }
+}

@@ -1,6 +1,9 @@
 package types
 
-import "time"
+import (
+	"github.com/mikethehud/glancegg/packages/server/graph/model"
+	"time"
+)
 
 type Question struct {
 	ID           string       `db:"id"`
@@ -9,6 +12,16 @@ type Question struct {
 	Position     int          `db:"position"`
 	Text         string       `db:"text" validate:"required"`
 	ResponseType ResponseType `db:"response_type"`
+}
+
+func (q *Question) ToModel() *model.Question {
+	return &model.Question{
+		ID:           q.ID,
+		Position:     q.Position,
+		QuestionType: q.QuestionType,
+		Text:         q.Text,
+		ResponseType: model.ResponseType(q.ResponseType),
+	}
 }
 
 type ResponseType string

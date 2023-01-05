@@ -6,35 +6,40 @@ enum ResponseType {
 
 type CheckIn {
     id: ID!
-    # questions: [Question!]!
-    organization: Organization!
+    questions: [Question!]!
     user: User!
-    reviewer: User!
     createdAt: Time!
+    completedAt: Time
+    reviewedAt: Time
 }
 
-# type Question {
-#     id: ID!
-#     checkIn: CheckIn!
-#     position: Int!
-#     questionType: String!
-#     text: String!
-#     responseType: ResponseType!
-#     # responses: [Response!]
-# }
+type Question {
+    id: ID!
+    # checkIn: CheckIn!
+    position: Int!
+    questionType: String!
+    text: String!
+    responseType: ResponseType!
+    # responses: [Response!]
+}
 
 # type Response {
 #     id: ID!
 #     position: Int!
-#     response: String!
 #     question: Question!
-#     completedAt: Timestamp
 # }
 
-# extend type Query {
-#     checkIns: [CheckIn!]
-#     # checkInByID(checkInID: ID!): CheckIn!
+# type ScaleResponse implements Response {
+#     id: ID!
+#     position: Int!
+#     question: Question!
+#     response: Int!
 # }
+
+# # extend type Query {
+# #     checkIns: [CheckIn!]
+# #     # checkInByID(checkInID: ID!): CheckIn!
+# # }
 
 input CreateCheckInInput {
     userID: ID!
@@ -42,4 +47,9 @@ input CreateCheckInInput {
 
 extend type Mutation {
     createCheckIn(input: CreateCheckInInput!): String!
+}
+
+extend type Query {
+    checkIns: [CheckIn!]
+    checkInByID(checkInID: ID!): CheckIn!
 }

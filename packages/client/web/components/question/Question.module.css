@@ -1,0 +1,15 @@
+.questions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+}
+
+.question {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+}
+
+.text {
+    font-weight: bold;
+}

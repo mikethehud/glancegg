@@ -3,3 +3,8 @@
     border-radius: var(--border-radius);
     padding: var(--space-s) var(--space-m);
 }
+
+.hoverEffect:hover {
+    background-color: var(--color-gray);
+    cursor: pointer;
+}

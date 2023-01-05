@@ -1,0 +1,46 @@
+.checkInOverview {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+}
+
+.checkInPreview {
+    border-bottom: 2px solid transparent;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.checkInPreview.currentCheckIn {
+    border-color: var(--color-green);
+}
+
+.checkInPreviewTitle {
+    font-size: var(--text-size-s);
+}
+
+.checkInStatus {
+    border-radius: var(--border-radius);
+    padding: var(--space-xxs) var(--space-xs);
+    font-size: var(--text-size-xs);
+    text-transform: uppercase;
+    background-color: var(--color-white);
+    text-align: center;
+    color: var(--color-black);
+    font-weight: bold;
+    width: 80px;
+}
+
+.checkInStatus.completed {
+    background-color: var(--color-yellow);
+}
+
+.checkInStatus.reviewed {
+    background-color: var(--color-green);
+}
+
+.checkInStatus.pastDue {
+    background-color: var(--color-red);
+    color: var(--color-white);
+}

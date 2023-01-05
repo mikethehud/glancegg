@@ -21,6 +21,19 @@ func CreateCheckIn(ctx context.Context, q QueryRunner, checkIn types.CheckIn) (s
 	return checkIn.ID, nil
 }
 
+func GetCheckInByID(ctx context.Context, q QueryRunner, checkInID string) (*types.CheckIn, error) {
+	query := `
+		SELECT * FROM check_ins WHERE id = $1
+	`
+
+	c := &types.CheckIn{}
+	err := q.GetContext(ctx, c, query, checkInID)
+	if err != nil {
+		return nil, err
+	}
+	return c, nil
+}
+
 func GetCheckInsByUserID(ctx context.Context, q QueryRunner, userID string) ([]*types.CheckIn, error) {
 	query := `
 		SELECT * FROM check_ins WHERE user_id = $1

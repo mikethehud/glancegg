@@ -145,3 +145,19 @@ func DeleteUser(ctx context.Context, q QueryRunner, userID string) error {
 	_, err := q.ExecContext(ctx, query, userID)
 	return err
 }
+
+func GetUserFromCheckIn(ctx context.Context, q QueryRunner, checkInID string) (*types.User, error) {
+	query := `
+		SELECT u.*
+		FROM check_ins c
+		LEFT JOIN users u ON u.id = c.user_id
+ 		WHERE c.id = $1
+	`
+
+	u := &types.User{}
+	err := q.GetContext(ctx, u, query, checkInID)
+	if err != nil {
+		return nil, err
+	}
+	return u, nil
+}

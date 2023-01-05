@@ -13,6 +13,21 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
+  Time: any;
+};
+
+export type CheckIn = {
+  __typename?: 'CheckIn';
+  completedAt?: Maybe<Scalars['Time']>;
+  createdAt: Scalars['Time'];
+  id: Scalars['ID'];
+  questions: Array<Question>;
+  reviewedAt?: Maybe<Scalars['Time']>;
+  user: User;
+};
+
+export type CreateCheckInInput = {
+  userID: Scalars['ID'];
 };
 
 export type CreateOrganizationAndJoinInput = {
@@ -26,6 +41,7 @@ export type LogInInput = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  createCheckIn: Scalars['String'];
   createOrganizationAndJoin: User;
   deleteOrganization?: Maybe<Scalars['Boolean']>;
   deleteUser?: Maybe<Scalars['Boolean']>;
@@ -36,6 +52,11 @@ export type Mutation = {
   signUpWithOrg: Scalars['String'];
   signUpWithoutOrg: Scalars['String'];
   updateUserPermissions: User;
+};
+
+
+export type MutationCreateCheckInArgs = {
+  input: CreateCheckInInput;
 };
 
 
@@ -85,6 +106,8 @@ export type OrganizationInfo = {
 export type Query = {
   __typename?: 'Query';
   authToken: Scalars['String'];
+  checkInByID: CheckIn;
+  checkIns?: Maybe<Array<CheckIn>>;
   getUsersReportingTo?: Maybe<Array<User>>;
   organization?: Maybe<Organization>;
   organizationInfo: OrganizationInfo;
@@ -92,9 +115,29 @@ export type Query = {
 };
 
 
+export type QueryCheckInByIdArgs = {
+  checkInID: Scalars['ID'];
+};
+
+
 export type QueryOrganizationInfoArgs = {
   id: Scalars['String'];
 };
+
+export type Question = {
+  __typename?: 'Question';
+  id: Scalars['ID'];
+  position: Scalars['Int'];
+  questionType: Scalars['String'];
+  responseType: ResponseType;
+  text: Scalars['String'];
+};
+
+export enum ResponseType {
+  Scale = 'SCALE',
+  Task = 'TASK',
+  Text = 'TEXT'
+}
 
 export enum Role {
   Admin = 'ADMIN',
@@ -210,6 +253,18 @@ export type GetAuthTokenQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetAuthTokenQuery = { __typename?: 'Query', authToken: string };
+
+export type GetCheckInByIdQueryVariables = Exact<{
+  checkInID: Scalars['ID'];
+}>;
+
+
+export type GetCheckInByIdQuery = { __typename?: 'Query', checkInByID: { __typename?: 'CheckIn', id: string, createdAt: any, completedAt?: any | null, reviewedAt?: any | null, questions: Array<{ __typename?: 'Question', id: string, text: string, questionType: string, responseType: ResponseType }> } };
+
+export type GetCheckInsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetCheckInsQuery = { __typename?: 'Query', checkIns?: Array<{ __typename?: 'CheckIn', id: string, createdAt: any, completedAt?: any | null, reviewedAt?: any | null, user: { __typename?: 'User', firstName: string, lastName: string } }> | null };
 
 export type GetOrganizationAndMembersQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -598,6 +653,91 @@ export function useGetAuthTokenLazyQuery(baseOptions?: Apollo.LazyQueryHookOptio
 export type GetAuthTokenQueryHookResult = ReturnType<typeof useGetAuthTokenQuery>;
 export type GetAuthTokenLazyQueryHookResult = ReturnType<typeof useGetAuthTokenLazyQuery>;
 export type GetAuthTokenQueryResult = Apollo.QueryResult<GetAuthTokenQuery, GetAuthTokenQueryVariables>;
+export const GetCheckInByIdDocument = gql`
+    query GetCheckInByID($checkInID: ID!) {
+  checkInByID(checkInID: $checkInID) {
+    id
+    createdAt
+    completedAt
+    reviewedAt
+    questions {
+      id
+      text
+      questionType
+      responseType
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetCheckInByIdQuery__
+ *
+ * To run a query within a React component, call `useGetCheckInByIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetCheckInByIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetCheckInByIdQuery({
+ *   variables: {
+ *      checkInID: // value for 'checkInID'
+ *   },
+ * });
+ */
+export function useGetCheckInByIdQuery(baseOptions: Apollo.QueryHookOptions<GetCheckInByIdQuery, GetCheckInByIdQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetCheckInByIdQuery, GetCheckInByIdQueryVariables>(GetCheckInByIdDocument, options);
+      }
+export function useGetCheckInByIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetCheckInByIdQuery, GetCheckInByIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetCheckInByIdQuery, GetCheckInByIdQueryVariables>(GetCheckInByIdDocument, options);
+        }
+export type GetCheckInByIdQueryHookResult = ReturnType<typeof useGetCheckInByIdQuery>;
+export type GetCheckInByIdLazyQueryHookResult = ReturnType<typeof useGetCheckInByIdLazyQuery>;
+export type GetCheckInByIdQueryResult = Apollo.QueryResult<GetCheckInByIdQuery, GetCheckInByIdQueryVariables>;
+export const GetCheckInsDocument = gql`
+    query GetCheckIns {
+  checkIns {
+    id
+    createdAt
+    completedAt
+    reviewedAt
+    user {
+      firstName
+      lastName
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetCheckInsQuery__
+ *
+ * To run a query within a React component, call `useGetCheckInsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetCheckInsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetCheckInsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetCheckInsQuery(baseOptions?: Apollo.QueryHookOptions<GetCheckInsQuery, GetCheckInsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetCheckInsQuery, GetCheckInsQueryVariables>(GetCheckInsDocument, options);
+      }
+export function useGetCheckInsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetCheckInsQuery, GetCheckInsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetCheckInsQuery, GetCheckInsQueryVariables>(GetCheckInsDocument, options);
+        }
+export type GetCheckInsQueryHookResult = ReturnType<typeof useGetCheckInsQuery>;
+export type GetCheckInsLazyQueryHookResult = ReturnType<typeof useGetCheckInsLazyQuery>;
+export type GetCheckInsQueryResult = Apollo.QueryResult<GetCheckInsQuery, GetCheckInsQueryVariables>;
 export const GetOrganizationAndMembersDocument = gql`
     query GetOrganizationAndMembers {
   organization {

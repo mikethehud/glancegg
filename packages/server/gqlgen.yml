@@ -25,6 +25,12 @@ models:
     fields:
       members:
         resolver: true
+  CheckIn:
+    fields:
+      user:
+        resolver: true
+      questions:
+        resolver: true
   User:
     fields:
       organization:

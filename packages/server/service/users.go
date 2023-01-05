@@ -97,6 +97,15 @@ func (s *Service) DeleteUser(ctx context.Context) error {
 	return queries.DeleteUser(ctx, s.dbx, utils.ContextUserID(ctx))
 }
 
+func (s *Service) GetUserFromCheckIn(ctx context.Context, checkInID string) (*types.User, error) {
+	u, err := queries.GetUserFromCheckIn(ctx, s.dbx, checkInID)
+	if err != nil {
+		return nil, utils.InternalError(s.Logger, err, "cannot fetch user")
+	}
+	return u, nil
+}
+
+// internal functions
 func (s *Service) joinOrganization(ctx context.Context, q queries.QueryRunner, userID string, orgID string, role types.Role) (*types.User, error) {
 	user, err := queries.JoinOrganization(ctx, q, userID, orgID, role)
 	if err != nil {

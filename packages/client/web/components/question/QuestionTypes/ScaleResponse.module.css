@@ -1,0 +1,32 @@
+.scale {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: var(--space-s);
+}
+
+.number {
+    text-align: center;
+    width: var(--space-xl);
+    height: var(--space-xl);
+    border-radius: var(--space-xl);
+    line-height: var(--space-xl);
+    border: 1px solid var(--color-white);
+    font-weight: bold;
+}
+
+.number.active {
+    background-color: var(--color-text);
+    color: var(--color-background);
+}
+
+.number:hover {
+    cursor: pointer;
+    background-color: var(--color-gray);
+    color: var(--color-text);
+}
+
+.number.active:hover {
+    background-color: var(--color-text);
+    color: var(--color-background);
+}

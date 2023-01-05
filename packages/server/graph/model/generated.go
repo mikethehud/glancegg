@@ -10,11 +10,12 @@ import (
 )
 
 type CheckIn struct {
-	ID           string        `json:"id"`
-	Organization *Organization `json:"organization"`
-	User         *User         `json:"user"`
-	Reviewer     *User         `json:"reviewer"`
-	CreatedAt    time.Time     `json:"createdAt"`
+	ID          string      `json:"id"`
+	Questions   []*Question `json:"questions"`
+	User        *User       `json:"user"`
+	CreatedAt   time.Time   `json:"createdAt"`
+	CompletedAt *time.Time  `json:"completedAt"`
+	ReviewedAt  *time.Time  `json:"reviewedAt"`
 }
 
 type CreateCheckInInput struct {
@@ -39,6 +40,14 @@ type Organization struct {
 type OrganizationInfo struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
+}
+
+type Question struct {
+	ID           string       `json:"id"`
+	Position     int          `json:"position"`
+	QuestionType string       `json:"questionType"`
+	Text         string       `json:"text"`
+	ResponseType ResponseType `json:"responseType"`
 }
 
 type SignUpWithOrgInput struct {
