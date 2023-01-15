@@ -75,11 +75,11 @@ func TestUpdateUserPermissions(t *testing.T) {
 			Role:           types.AdminRole,
 		})
 		role := types.UserRole
-		u, err := UpdateUserPermissions(context.TODO(), db, user.ID, org.ID, role, nil)
+		u, err := UpdateUserPermissions(context.TODO(), db, user.ID, org.ID, &role, nil)
 		require.NoError(t, err)
 		require.Equal(t, types.UserRole, u.Role)
 		require.Nil(t, u.ReportsTo)
-		u, err = UpdateUserPermissions(context.TODO(), db, user.ID, org.ID, role, &reviewer.ID)
+		u, err = UpdateUserPermissions(context.TODO(), db, user.ID, org.ID, &role, &reviewer.ID)
 		require.NoError(t, err)
 		require.Equal(t, types.UserRole, u.Role)
 		require.Equal(t, reviewer.ID, *u.ReportsTo)

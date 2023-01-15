@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 	"github.com/jmoiron/sqlx"
+	"github.com/mikethehud/glancegg/packages/server/cloud_functions"
 	"github.com/mikethehud/glancegg/packages/server/graph/generated"
 	"github.com/mikethehud/glancegg/packages/server/graph/resolver"
 	"github.com/mikethehud/glancegg/packages/server/service"
@@ -61,6 +62,8 @@ func main() {
 		RunMigrate(log, dbx)
 	case "graphql":
 		RunServer(log, dbx)
+	case "cloud_refresh_check_ins":
+		cloud_functions.RefreshCheckIns(log, dbx)
 	}
 }
 
@@ -116,7 +119,7 @@ func RunServer(log *logrus.Logger, dbx *sqlx.DB) {
 	log.Infof("Visit playground on http://localhost:%s/graphiql", graphqlPort)
 	r.Handle("/graphiql", playground.Handler("GraphQL playground", "/graphql"))
 	r.Handle("/graphql", srv)
-	log.Fatal(http.ListenAndServe(":"+graphqlPort, r))
+	log.Fatal(http.ListenAndServe("localhost:"+graphqlPort, r))
 }
 
 func authTokenMiddleware(log *logrus.Logger) func(http.Handler) http.Handler {

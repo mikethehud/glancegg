@@ -2,6 +2,8 @@
     padding: var(--space-s);
     font-size: var(--text-size-s);
     background-color: red;
-    color: var(--color-text);
+    color: var(--color-white);
     width: 100%;
+    margin-top: var(--space-xxs);
+    border-radius: var(--border-radius);
 }

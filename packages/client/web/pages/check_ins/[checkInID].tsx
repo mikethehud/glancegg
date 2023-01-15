@@ -1,36 +1,45 @@
 import { NextPage } from "next"
+import Link from "next/link"
 import { useRouter } from "next/router"
+import { Back } from "../../components/back/Back"
+import { CheckInCompleted } from "../../components/checkIn/CheckInCompleted"
+import { CheckInNew } from "../../components/checkIn/CheckInNew"
 import { Container } from "../../components/container/Container"
 import { Section } from "../../components/container/Section"
 import { Layout } from "../../components/layout/Layout"
-import { Questions, Question } from "../../components/question/Question"
-import { useGetCheckInByIdQuery } from "../../lib/graphql/generated/generated"
+import { useGetCheckInByIdQuery, useGetUserQuery } from "../../lib/graphql/generated/generated"
 
 const CheckIn: NextPage = ({}) => {
     const router = useRouter()
     const { query: { checkInID }, isReady } = router
     const safeCheckInID = typeof(checkInID) == "string" ? checkInID : ""
-    const { data, loading } = useGetCheckInByIdQuery({ variables: { checkInID: safeCheckInID } })
+    const { data, loading } = useGetCheckInByIdQuery({variables: { checkInID: safeCheckInID }})
+    const user = useGetUserQuery()
+    const title = "Check-In"
 
-    if (loading || !isReady) {
-        return <Layout loading />
+    if (user.loading || loading || !isReady) {
+        return <Layout loading title={title} />
     }
 
-    if (!data || !data.checkInByID) {
-        return <Layout>Error loading check in</Layout>
+    if (!user.data || !data || !user.data.user || !data.checkInByID) {
+        return <Layout title={title}>Error loading check-in</Layout>
     }
+
+    const isReviewer = data.checkInByID.reviewer.id === user.data.user.id
 
     return (
-        <Layout>
+        <Layout title={title}>
             <Container size="medium">
                 <Section>
-                    <h1>Check In</h1>
+                    <h1>
+                        <Back href={isReviewer ? '/check_ins/reports' : '/check_ins'} />
+                        Check-In
+                    </h1>
                 </Section>
-                <Section>
-                    <Questions>
-                        {data.checkInByID.questions.map(({questionType, responseType, text}) => <Question questionType={questionType} responseType={responseType} text={text} />)}
-                    </Questions>
-                </Section>
+                {data.checkInByID.completedAt
+                    ? <CheckInCompleted checkIn={data.checkInByID} />
+                    : <CheckInNew checkIn={data.checkInByID} />
+                }
             </Container>
         </Layout>
     )

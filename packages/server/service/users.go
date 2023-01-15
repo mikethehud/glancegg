@@ -33,8 +33,37 @@ func (s *Service) GetUsersByOrganizationID(ctx context.Context, orgID string) ([
 	return users, nil
 }
 
-func (s *Service) UpdateUserPermissions(ctx context.Context, userID string, orgID string, role types.Role, reportingTo *string) (*types.User, error) {
-	u, err := queries.UpdateUserPermissions(ctx, s.dbx, userID, orgID, role, reportingTo)
+func (s *Service) UpdateRole(ctx context.Context, userID string, orgID string, role types.Role) (*types.User, error) {
+	u, err := queries.UpdateRole(ctx, s.dbx, userID, orgID, role)
+	if err != nil {
+		return nil, utils.InternalError(s.Logger, err, "cannot update user")
+	}
+	return u, nil
+}
+
+func (s *Service) UpdateReportsTo(ctx context.Context, userID string, orgID string, reportingTo *string) (*types.User, error) {
+	tx := s.dbx.MustBegin()
+	u, err := queries.UpdateReportsTo(ctx, tx, userID, orgID, reportingTo)
+	if err != nil {
+		tx.Rollback()
+		return nil, utils.InternalError(s.Logger, err, "error updating reportingTo")
+	}
+
+	err = queries.DeleteOpenCheckInsForUserID(ctx, tx, userID)
+	if err != nil {
+		tx.Rollback()
+		return nil, utils.InternalError(s.Logger, err, "error deleting open check ins")
+	}
+
+	if reportingTo != nil {
+		_, err = s.createCheckInAndQuestionsWithTx(ctx, tx, userID)
+		if err != nil {
+			tx.Rollback()
+			return nil, utils.InternalError(s.Logger, err, "error deleting open check ins")
+		}
+	}
+
+	err = tx.Commit()
 	if err != nil {
 		return nil, utils.InternalError(s.Logger, err, "cannot update user")
 	}
@@ -61,14 +90,14 @@ func (s *Service) LeaveOrganization(ctx context.Context, userID string, orgID st
 	return nil
 }
 
-func (s *Service) CreateAndJoinOrganization(ctx context.Context, name string) (*types.User, error) {
+func (s *Service) CreateAndJoinOrganization(ctx context.Context, name string, timeZone string) (*types.User, error) {
 	tx := s.dbx.MustBegin()
-	orgID, err := s.createOrganization(ctx, tx, name)
+	orgID, err := s.createOrganization(ctx, tx, name, timeZone)
 	if err != nil {
 		tx.Rollback()
 		return nil, err
 	}
-	user, err := s.joinOrganization(ctx, tx, utils.ContextUserID(ctx), orgID, types.AdminRole)
+	user, err := queries.JoinOrganization(ctx, tx, utils.ContextUserID(ctx), orgID, types.AdminRole)
 	if err != nil {
 		tx.Rollback()
 		return nil, err
@@ -105,14 +134,23 @@ func (s *Service) GetUserFromCheckIn(ctx context.Context, checkInID string) (*ty
 	return u, nil
 }
 
-// internal functions
-func (s *Service) joinOrganization(ctx context.Context, q queries.QueryRunner, userID string, orgID string, role types.Role) (*types.User, error) {
-	user, err := queries.JoinOrganization(ctx, q, userID, orgID, role)
+func (s *Service) GetReviewerFromCheckIn(ctx context.Context, checkInID string) (*types.User, error) {
+	u, err := queries.GetReviewerFromCheckIn(ctx, s.dbx, checkInID)
+	if err != nil {
+		return nil, utils.InternalError(s.Logger, err, "cannot fetch user")
+	}
+	return u, nil
+}
+
+func (s *Service) JoinOrganization(ctx context.Context, userID string, orgID string) (*types.User, error) {
+	user, err := queries.JoinOrganization(ctx, s.dbx, userID, orgID, types.UserRole)
 	if err != nil {
 		return nil, utils.InternalError(s.Logger, err, "error joining organization")
 	}
 	return user, nil
 }
+
+// internal functions
 
 func (s *Service) createUser(ctx context.Context, tx queries.QueryRunner, user types.User) (*types.User, error) {
 	// create user

@@ -1,0 +1,14 @@
+query GetCheckInsByReviewer {
+    checkInsByReviewer {
+        id
+        createdAt
+        completedAt
+        reviewedAt
+        expiresAt
+        expired
+        user {
+            firstName
+            lastName
+        }
+    }
+}

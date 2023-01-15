@@ -1,10 +1,8 @@
-import Image from "next/image"
+import { faGear, faRightFromBracket, faUser, faUsers } from "@fortawesome/free-solid-svg-icons"
 import React, { useState } from "react"
-import { Maybe, Organization, User } from "../../../lib/graphql/generated/generated"
+import { Maybe, Organization, Role, User } from "../../../lib/graphql/generated/generated"
 import { useOutsideClickCallback } from "../../../lib/hooks/useOutsideClickCallback"
-import { Avatar } from "../../avatar/Avatar"
 import { Dropdown } from "../../dropdown/Dropdown"
-import { DropdownDivider } from "../../dropdown/DropdownDivider"
 import { DropdownLink } from "../../dropdown/DropdownLink"
 import { UserBadge } from "../../userBadge/UserBadge"
 import styles from "./Navigation.module.css"
@@ -18,31 +16,24 @@ export const UserDropdown = ({ user, organization }: UserDropdownProps) => {
     const [userNavOpen, setUserNavOpen] = useState(false)
     const dropDownRef = React.createRef<HTMLDivElement>()
 
-    useOutsideClickCallback(dropDownRef, () => { console.log("clicked somewhere wow"); setUserNavOpen(false); })
+    useOutsideClickCallback(dropDownRef, () => { setUserNavOpen(false); })
 
     const DropDown = () => (
         <Dropdown>
-            <DropdownLink href="/profile">
-                Signed in as<br />
-                <b>{user.firstName} {user.lastName}</b>
+            <DropdownLink href="/profile" icon={faUser}>
+                <b>Account</b>
             </DropdownLink>
-            <DropdownDivider />
-            {organization
-                ? (
-                    <DropdownLink href="/org" className={styles.orgLink}>
-                        <Avatar name={organization.name} />
-                        <strong>{organization.name}</strong>
-                    </DropdownLink>
-                )
-                : (
-                    <DropdownLink href="/org/create" className={styles.orgLink}>
-                        <Avatar name="?" />
-                        <strong>Create Organization</strong>
-                    </DropdownLink>
-                )
-            }
-            <DropdownDivider />
-            <DropdownLink href="/logout"><strong>Logout</strong></DropdownLink>
+            {organization && user.role === Role.Admin && (
+                <DropdownLink href="/org" className={styles.orgLink} icon={faGear}>
+                    <strong>Settings</strong>
+                </DropdownLink>
+            )}
+            {!organization && (
+                <DropdownLink href="/org/create" className={styles.orgLink} icon={faUsers}>
+                    <strong>Create Organization</strong>
+                </DropdownLink>
+            )}
+            <DropdownLink href="/logout" icon={faRightFromBracket}><strong>Logout</strong></DropdownLink>
         </Dropdown>
     )
 

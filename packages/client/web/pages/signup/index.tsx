@@ -1,19 +1,8 @@
 import { NextPage } from "next";
-import React, { useEffect } from "react";
-import { Button } from "../../components/button/Button";
-import { FormElement } from "../../components/formElement/FormElement";
+import React from "react";
 import { Container } from "../../components/container/Container";
-import { TextInput } from "../../components/textInput/TextInput";
-import Link from "next/link";
-import { TextLink } from "../../components/textLink/TextLink";
-import styles from "./Signup.module.css"
-import { SubmitHandler, useForm } from "react-hook-form";
-import { useSignUpWithoutOrgMutation } from "../../lib/graphql/generated/generated";
-import { FormError } from "../../components/formError/FormError";
 import { useRouter } from "next/router";
-import { getToken } from "../../lib/jwt/jwt";
 import { LayoutPublic } from "../../components/layout/LayoutPublic";
-import { Card } from "../../components/card/Card";
 import { Section } from "../../components/container/Section";
 import { SignupForm } from "../../components/signup/SignupForm";
 import { useAuth } from "../../lib/hooks/useAuth";
@@ -46,24 +35,26 @@ const Signup: NextPage = () => {
     }
 
     return (
-        <LayoutPublic>
+        <LayoutPublic title="Sign Up">
             <Container size="medium">
                 <Section>
                     <h1>Sign Up</h1>
                 </Section>
                 <Section>
-                    Todo: Add some text here to explain why it's cool 😎
+                    Todo: Add description
                 </Section>
-                <SignupForm onSuccess={() => doRedirect()} />
+                <Section>
+                    <SignupForm onSuccess={() => doRedirect()} />
+                </Section>
+                <BottomLinks>
+                    <BottomLink href="/login" primary>
+                        Log In
+                    </BottomLink>
+                    <BottomLink href="/forgot_password">
+                        Forgot Password
+                    </BottomLink>
+                </BottomLinks>
             </Container>
-            <BottomLinks>
-                <BottomLink href="/login" primary>
-                    Log In
-                </BottomLink>
-                <BottomLink href="/forgot_password">
-                    Forgot Password
-                </BottomLink>
-            </BottomLinks>
         </LayoutPublic>
     )
 }

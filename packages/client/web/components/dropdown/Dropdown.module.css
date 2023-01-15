@@ -10,57 +10,67 @@
     position: absolute;
     right: 0;
     top: var(--space-s);
-    border: 1px solid var(--color-gray);
     border-radius: var(--border-radius);
-    border-top-right-radius: 0;
-    padding: var(--space-xxs) 0;
     box-shadow: var(--shadow);
 }
 
-.anchor::before, .anchor::after {
+.anchor::after {
     content: "";
     display: block;
+    width: 0; 
+    height: 0;     
+    position: absolute;
     border-left: 10px solid transparent;
     border-right: 10px solid transparent;
-    border-bottom: 10px solid var(--color-gray);
-    width: 0; 
-    height: 0; 
-    position: absolute;
-    top: 3px;
-    left: 50%;
+    border-bottom: 10px solid var(--color-black-accent);
     margin-left: -10px;
-}
-
-.anchor::after {
-    border-left: 9px solid transparent;
-    border-right: 9px solid transparent;
-    border-bottom: 9px solid var(--color-black-accent);
-    margin-left: -9px;
     top: 4px;
+    left: 50%;
 }
 
 .inner {
     display: flex;
     flex-direction: column;
+    position: relative;
+    z-index: 1;
 }
 
-.link, .text {
+.linkWrapper {
     width: 100%;
     font-size: var(--text-size-s);
-    padding: var(--space-xs) var(--space-s);
+    padding: var(--space-s) var(--space-s);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-xs);
+    border-bottom: 1px solid rgba(255,255,255,0.25);
+}
+
+.linkWrapper:first-of-type {
+    border-top-right-radius: var(--border-radius);
+    border-top-left-radius: var(--border-radius);
+}
+
+.linkWrapper:last-of-type {
+    border-bottom-right-radius: var(--border-radius);
+    border-bottom-left-radius: var(--border-radius);
+    border-bottom: 0;
+}
+
+.link {
+    width: 100%;
     color: var(--color-white);
 }
 
-.link:hover {
+.icon {
+    font-size: var(--text-size-xs);
+}
+
+.linkWrapper:hover {
     background-color: var(--color-blue);
+    cursor: pointer;
 }
 
 .text {
-    background-color: var(--color-gray);
-}
-
-.divider {
-    height: 1px;
-    background-color: gray;
-    margin: var(--space-xxs) 0;
+    background-color: var(--color-highlight);
 }

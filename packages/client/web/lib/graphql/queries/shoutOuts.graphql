@@ -1,0 +1,15 @@
+query GetShoutOuts {
+    shoutOuts {
+        id
+        user {
+            firstName
+            lastName
+        }
+        receivers {
+            firstName
+            lastName
+        }
+        shoutOut
+        createdAt
+    }
+}

@@ -41,6 +41,7 @@ type ResolverRoot interface {
 	Mutation() MutationResolver
 	Organization() OrganizationResolver
 	Query() QueryResolver
+	Question() QuestionResolver
 	User() UserResolver
 }
 
@@ -51,30 +52,42 @@ type ComplexityRoot struct {
 	CheckIn struct {
 		CompletedAt func(childComplexity int) int
 		CreatedAt   func(childComplexity int) int
+		Expired     func(childComplexity int) int
+		ExpiresAt   func(childComplexity int) int
 		ID          func(childComplexity int) int
 		Questions   func(childComplexity int) int
+		Review      func(childComplexity int) int
 		ReviewedAt  func(childComplexity int) int
+		Reviewer    func(childComplexity int) int
 		User        func(childComplexity int) int
 	}
 
 	Mutation struct {
 		CreateCheckIn              func(childComplexity int, input model.CreateCheckInInput) int
 		CreateOrganizationAndJoin  func(childComplexity int, input model.CreateOrganizationAndJoinInput) int
+		CreateShoutOut             func(childComplexity int, input model.ShoutOutInput) int
 		DeleteOrganization         func(childComplexity int) int
 		DeleteUser                 func(childComplexity int) int
+		JoinOrganization           func(childComplexity int, organizationID string) int
 		LeaveOrganization          func(childComplexity int) int
 		LogIn                      func(childComplexity int, input model.LogInInput) int
 		LogOut                     func(childComplexity int) int
 		RemoveUserFromOrganization func(childComplexity int, userID string) int
 		SignUpWithOrg              func(childComplexity int, input model.SignUpWithOrgInput) int
 		SignUpWithoutOrg           func(childComplexity int, input model.SignUpWithoutOrgInput) int
-		UpdateUserPermissions      func(childComplexity int, userID string, input model.UpdateUserPermissionsInput) int
+		SubmitCheckInResponses     func(childComplexity int, input model.SubmitCheckInResponsesInput) int
+		SubmitCheckInReview        func(childComplexity int, input model.SubmitCheckInReviewInput) int
+		UpdateOrgSettings          func(childComplexity int, input model.OrgSettingsInput) int
+		UpdateReportsTo            func(childComplexity int, userID string, reportsTo *string) int
+		UpdateRole                 func(childComplexity int, userID string, role model.Role) int
 	}
 
 	Organization struct {
-		ID      func(childComplexity int) int
-		Members func(childComplexity int) int
-		Name    func(childComplexity int) int
+		CheckInWeekday func(childComplexity int) int
+		ID             func(childComplexity int) int
+		Members        func(childComplexity int) int
+		Name           func(childComplexity int) int
+		Timezone       func(childComplexity int) int
 	}
 
 	OrganizationInfo struct {
@@ -83,13 +96,16 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		AuthToken           func(childComplexity int) int
-		CheckInByID         func(childComplexity int, checkInID string) int
-		CheckIns            func(childComplexity int) int
-		GetUsersReportingTo func(childComplexity int) int
-		Organization        func(childComplexity int) int
-		OrganizationInfo    func(childComplexity int, id string) int
-		User                func(childComplexity int) int
+		AuthToken            func(childComplexity int) int
+		CheckInByID          func(childComplexity int, checkInID string) int
+		CheckIns             func(childComplexity int) int
+		CheckInsByReviewer   func(childComplexity int) int
+		GetUsersReportingTo  func(childComplexity int) int
+		Organization         func(childComplexity int) int
+		OrganizationInfo     func(childComplexity int, id string) int
+		ShoutOuts            func(childComplexity int) int
+		ShoutOutsByCheckInID func(childComplexity int, checkInID string) int
+		User                 func(childComplexity int) int
 	}
 
 	Question struct {
@@ -97,12 +113,22 @@ type ComplexityRoot struct {
 		Position     func(childComplexity int) int
 		QuestionType func(childComplexity int) int
 		ResponseType func(childComplexity int) int
+		Responses    func(childComplexity int) int
 		Text         func(childComplexity int) int
 	}
 
-	Team struct {
-		ID   func(childComplexity int) int
-		Name func(childComplexity int) int
+	Response struct {
+		ID       func(childComplexity int) int
+		Position func(childComplexity int) int
+		Response func(childComplexity int) int
+	}
+
+	ShoutOut struct {
+		CreatedAt func(childComplexity int) int
+		ID        func(childComplexity int) int
+		Receivers func(childComplexity int) int
+		ShoutOut  func(childComplexity int) int
+		User      func(childComplexity int) int
 	}
 
 	User struct {
@@ -119,6 +145,7 @@ type ComplexityRoot struct {
 type CheckInResolver interface {
 	Questions(ctx context.Context, obj *model.CheckIn) ([]*model.Question, error)
 	User(ctx context.Context, obj *model.CheckIn) (*model.User, error)
+	Reviewer(ctx context.Context, obj *model.CheckIn) (*model.User, error)
 }
 type MutationResolver interface {
 	SignUpWithOrg(ctx context.Context, input model.SignUpWithOrgInput) (string, error)
@@ -126,12 +153,18 @@ type MutationResolver interface {
 	LogIn(ctx context.Context, input model.LogInInput) (string, error)
 	LogOut(ctx context.Context) (*bool, error)
 	CreateCheckIn(ctx context.Context, input model.CreateCheckInInput) (string, error)
+	SubmitCheckInResponses(ctx context.Context, input model.SubmitCheckInResponsesInput) (*model.CheckIn, error)
+	SubmitCheckInReview(ctx context.Context, input model.SubmitCheckInReviewInput) (*model.CheckIn, error)
+	UpdateOrgSettings(ctx context.Context, input model.OrgSettingsInput) (*model.Organization, error)
 	CreateOrganizationAndJoin(ctx context.Context, input model.CreateOrganizationAndJoinInput) (*model.User, error)
 	RemoveUserFromOrganization(ctx context.Context, userID string) (*model.Organization, error)
 	DeleteOrganization(ctx context.Context) (*bool, error)
+	CreateShoutOut(ctx context.Context, input model.ShoutOutInput) (string, error)
 	DeleteUser(ctx context.Context) (*bool, error)
 	LeaveOrganization(ctx context.Context) (*bool, error)
-	UpdateUserPermissions(ctx context.Context, userID string, input model.UpdateUserPermissionsInput) (*model.User, error)
+	UpdateReportsTo(ctx context.Context, userID string, reportsTo *string) (*model.User, error)
+	UpdateRole(ctx context.Context, userID string, role model.Role) (*model.User, error)
+	JoinOrganization(ctx context.Context, organizationID string) (string, error)
 }
 type OrganizationResolver interface {
 	Members(ctx context.Context, obj *model.Organization) ([]*model.User, error)
@@ -139,11 +172,17 @@ type OrganizationResolver interface {
 type QueryResolver interface {
 	AuthToken(ctx context.Context) (string, error)
 	CheckIns(ctx context.Context) ([]*model.CheckIn, error)
+	CheckInsByReviewer(ctx context.Context) ([]*model.CheckIn, error)
 	CheckInByID(ctx context.Context, checkInID string) (*model.CheckIn, error)
 	Organization(ctx context.Context) (*model.Organization, error)
 	OrganizationInfo(ctx context.Context, id string) (*model.OrganizationInfo, error)
+	ShoutOuts(ctx context.Context) ([]*model.ShoutOut, error)
+	ShoutOutsByCheckInID(ctx context.Context, checkInID string) ([]*model.ShoutOut, error)
 	User(ctx context.Context) (*model.User, error)
 	GetUsersReportingTo(ctx context.Context) ([]*model.User, error)
+}
+type QuestionResolver interface {
+	Responses(ctx context.Context, obj *model.Question) ([]*model.Response, error)
 }
 type UserResolver interface {
 	Organization(ctx context.Context, obj *model.User) (*model.Organization, error)
@@ -178,6 +217,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CheckIn.CreatedAt(childComplexity), true
 
+	case "CheckIn.expired":
+		if e.complexity.CheckIn.Expired == nil {
+			break
+		}
+
+		return e.complexity.CheckIn.Expired(childComplexity), true
+
+	case "CheckIn.expiresAt":
+		if e.complexity.CheckIn.ExpiresAt == nil {
+			break
+		}
+
+		return e.complexity.CheckIn.ExpiresAt(childComplexity), true
+
 	case "CheckIn.id":
 		if e.complexity.CheckIn.ID == nil {
 			break
@@ -192,12 +245,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CheckIn.Questions(childComplexity), true
 
+	case "CheckIn.review":
+		if e.complexity.CheckIn.Review == nil {
+			break
+		}
+
+		return e.complexity.CheckIn.Review(childComplexity), true
+
 	case "CheckIn.reviewedAt":
 		if e.complexity.CheckIn.ReviewedAt == nil {
 			break
 		}
 
 		return e.complexity.CheckIn.ReviewedAt(childComplexity), true
+
+	case "CheckIn.reviewer":
+		if e.complexity.CheckIn.Reviewer == nil {
+			break
+		}
+
+		return e.complexity.CheckIn.Reviewer(childComplexity), true
 
 	case "CheckIn.user":
 		if e.complexity.CheckIn.User == nil {
@@ -230,6 +297,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateOrganizationAndJoin(childComplexity, args["input"].(model.CreateOrganizationAndJoinInput)), true
 
+	case "Mutation.createShoutOut":
+		if e.complexity.Mutation.CreateShoutOut == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createShoutOut_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateShoutOut(childComplexity, args["input"].(model.ShoutOutInput)), true
+
 	case "Mutation.deleteOrganization":
 		if e.complexity.Mutation.DeleteOrganization == nil {
 			break
@@ -243,6 +322,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.DeleteUser(childComplexity), true
+
+	case "Mutation.joinOrganization":
+		if e.complexity.Mutation.JoinOrganization == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_joinOrganization_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.JoinOrganization(childComplexity, args["organizationID"].(string)), true
 
 	case "Mutation.leaveOrganization":
 		if e.complexity.Mutation.LeaveOrganization == nil {
@@ -306,17 +397,72 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.SignUpWithoutOrg(childComplexity, args["input"].(model.SignUpWithoutOrgInput)), true
 
-	case "Mutation.updateUserPermissions":
-		if e.complexity.Mutation.UpdateUserPermissions == nil {
+	case "Mutation.submitCheckInResponses":
+		if e.complexity.Mutation.SubmitCheckInResponses == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_updateUserPermissions_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_submitCheckInResponses_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateUserPermissions(childComplexity, args["userID"].(string), args["input"].(model.UpdateUserPermissionsInput)), true
+		return e.complexity.Mutation.SubmitCheckInResponses(childComplexity, args["input"].(model.SubmitCheckInResponsesInput)), true
+
+	case "Mutation.submitCheckInReview":
+		if e.complexity.Mutation.SubmitCheckInReview == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_submitCheckInReview_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.SubmitCheckInReview(childComplexity, args["input"].(model.SubmitCheckInReviewInput)), true
+
+	case "Mutation.updateOrgSettings":
+		if e.complexity.Mutation.UpdateOrgSettings == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateOrgSettings_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateOrgSettings(childComplexity, args["input"].(model.OrgSettingsInput)), true
+
+	case "Mutation.updateReportsTo":
+		if e.complexity.Mutation.UpdateReportsTo == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateReportsTo_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateReportsTo(childComplexity, args["userID"].(string), args["reportsTo"].(*string)), true
+
+	case "Mutation.updateRole":
+		if e.complexity.Mutation.UpdateRole == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateRole_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateRole(childComplexity, args["userID"].(string), args["role"].(model.Role)), true
+
+	case "Organization.checkInWeekday":
+		if e.complexity.Organization.CheckInWeekday == nil {
+			break
+		}
+
+		return e.complexity.Organization.CheckInWeekday(childComplexity), true
 
 	case "Organization.id":
 		if e.complexity.Organization.ID == nil {
@@ -338,6 +484,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Organization.Name(childComplexity), true
+
+	case "Organization.timezone":
+		if e.complexity.Organization.Timezone == nil {
+			break
+		}
+
+		return e.complexity.Organization.Timezone(childComplexity), true
 
 	case "OrganizationInfo.id":
 		if e.complexity.OrganizationInfo.ID == nil {
@@ -379,6 +532,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.CheckIns(childComplexity), true
 
+	case "Query.checkInsByReviewer":
+		if e.complexity.Query.CheckInsByReviewer == nil {
+			break
+		}
+
+		return e.complexity.Query.CheckInsByReviewer(childComplexity), true
+
 	case "Query.getUsersReportingTo":
 		if e.complexity.Query.GetUsersReportingTo == nil {
 			break
@@ -404,6 +564,25 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.OrganizationInfo(childComplexity, args["id"].(string)), true
+
+	case "Query.shoutOuts":
+		if e.complexity.Query.ShoutOuts == nil {
+			break
+		}
+
+		return e.complexity.Query.ShoutOuts(childComplexity), true
+
+	case "Query.shoutOutsByCheckInID":
+		if e.complexity.Query.ShoutOutsByCheckInID == nil {
+			break
+		}
+
+		args, err := ec.field_Query_shoutOutsByCheckInID_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.ShoutOutsByCheckInID(childComplexity, args["checkInID"].(string)), true
 
 	case "Query.user":
 		if e.complexity.Query.User == nil {
@@ -440,6 +619,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Question.ResponseType(childComplexity), true
 
+	case "Question.responses":
+		if e.complexity.Question.Responses == nil {
+			break
+		}
+
+		return e.complexity.Question.Responses(childComplexity), true
+
 	case "Question.text":
 		if e.complexity.Question.Text == nil {
 			break
@@ -447,19 +633,61 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Question.Text(childComplexity), true
 
-	case "Team.id":
-		if e.complexity.Team.ID == nil {
+	case "Response.id":
+		if e.complexity.Response.ID == nil {
 			break
 		}
 
-		return e.complexity.Team.ID(childComplexity), true
+		return e.complexity.Response.ID(childComplexity), true
 
-	case "Team.name":
-		if e.complexity.Team.Name == nil {
+	case "Response.position":
+		if e.complexity.Response.Position == nil {
 			break
 		}
 
-		return e.complexity.Team.Name(childComplexity), true
+		return e.complexity.Response.Position(childComplexity), true
+
+	case "Response.response":
+		if e.complexity.Response.Response == nil {
+			break
+		}
+
+		return e.complexity.Response.Response(childComplexity), true
+
+	case "ShoutOut.createdAt":
+		if e.complexity.ShoutOut.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.ShoutOut.CreatedAt(childComplexity), true
+
+	case "ShoutOut.id":
+		if e.complexity.ShoutOut.ID == nil {
+			break
+		}
+
+		return e.complexity.ShoutOut.ID(childComplexity), true
+
+	case "ShoutOut.receivers":
+		if e.complexity.ShoutOut.Receivers == nil {
+			break
+		}
+
+		return e.complexity.ShoutOut.Receivers(childComplexity), true
+
+	case "ShoutOut.shoutOut":
+		if e.complexity.ShoutOut.ShoutOut == nil {
+			break
+		}
+
+		return e.complexity.ShoutOut.ShoutOut(childComplexity), true
+
+	case "ShoutOut.user":
+		if e.complexity.ShoutOut.User == nil {
+			break
+		}
+
+		return e.complexity.ShoutOut.User(childComplexity), true
 
 	case "User.email":
 		if e.complexity.User.Email == nil {
@@ -521,9 +749,13 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCreateCheckInInput,
 		ec.unmarshalInputCreateOrganizationAndJoinInput,
 		ec.unmarshalInputLogInInput,
+		ec.unmarshalInputOrgSettingsInput,
+		ec.unmarshalInputResponseInput,
+		ec.unmarshalInputShoutOutInput,
 		ec.unmarshalInputSignUpWithOrgInput,
 		ec.unmarshalInputSignUpWithoutOrgInput,
-		ec.unmarshalInputUpdateUserPermissionsInput,
+		ec.unmarshalInputSubmitCheckInResponsesInput,
+		ec.unmarshalInputSubmitCheckInReviewInput,
 	)
 	first := true
 
@@ -594,6 +826,7 @@ var sources = []*ast.Source{
 
 input SignUpWithoutOrgInput {
     organizationName: String!
+    organizationTimezone: String!
     firstName: String!
     lastName: String!
     email: String!
@@ -626,9 +859,13 @@ type CheckIn {
     id: ID!
     questions: [Question!]!
     user: User!
+    reviewer: User!
     createdAt: Time!
     completedAt: Time
     reviewedAt: Time
+    review: String
+    expiresAt: Time!
+    expired: Boolean!
 }
 
 type Question {
@@ -638,43 +875,52 @@ type Question {
     questionType: String!
     text: String!
     responseType: ResponseType!
-    # responses: [Response!]
+    responses: [Response!]
 }
 
-# type Response {
-#     id: ID!
-#     position: Int!
-#     question: Question!
-# }
-
-# type ScaleResponse implements Response {
-#     id: ID!
-#     position: Int!
-#     question: Question!
-#     response: Int!
-# }
-
-# # extend type Query {
-# #     checkIns: [CheckIn!]
-# #     # checkInByID(checkInID: ID!): CheckIn!
-# # }
+type Response {
+    id: ID!
+    position: Int!
+    response: String!
+}
 
 input CreateCheckInInput {
     userID: ID!
 }
 
+input ResponseInput {
+    questionID: ID!
+    position: Int!
+    response: String!
+}
+
+input SubmitCheckInResponsesInput {
+    checkInID: ID!
+    responses: [ResponseInput!]!
+}
+
+input SubmitCheckInReviewInput {
+    checkInID: ID!
+    review: String!
+}
+
 extend type Mutation {
     createCheckIn(input: CreateCheckInInput!): String!
+    submitCheckInResponses(input: SubmitCheckInResponsesInput!): CheckIn!
+    submitCheckInReview(input: SubmitCheckInReviewInput!): CheckIn!
 }
 
 extend type Query {
     checkIns: [CheckIn!]
+    checkInsByReviewer: [CheckIn!]
     checkInByID(checkInID: ID!): CheckIn!
 }`, BuiltIn: false},
 	{Name: "../../../../schema/organization.graphqls", Input: `type Organization {
     id: ID!
     name: String!
     members: [User!]!
+    timezone: String!
+    checkInWeekday: Int!
 }
 
 type OrganizationInfo {
@@ -684,6 +930,7 @@ type OrganizationInfo {
 
 input CreateOrganizationAndJoinInput {
     name: String!
+    timezone: String!
 }
 
 extend type Query {
@@ -691,17 +938,40 @@ extend type Query {
     organizationInfo(id: String!): OrganizationInfo!
 }
 
+input OrgSettingsInput {
+    timezone: String!
+    checkInWeekday: Int!
+}
+
 extend type Mutation {
+    updateOrgSettings(input: OrgSettingsInput!): Organization!
     createOrganizationAndJoin(input: CreateOrganizationAndJoinInput!): User!
     removeUserFromOrganization(userID: ID!): Organization!
     deleteOrganization: Boolean
 }`, BuiltIn: false},
 	{Name: "../../../../schema/schema.graphqls", Input: `scalar Time`, BuiltIn: false},
-	{Name: "../../../../schema/team.graphqls", Input: `type Team {
+	{Name: "../../../../schema/shoutOuts.graphqls", Input: `type ShoutOut {
     id: ID!
-    name: String!
+    shoutOut: String!
+    user: User!
+    receivers: [User!]!
+    createdAt: Time!
 }
-`, BuiltIn: false},
+
+extend type Query {
+    shoutOuts: [ShoutOut!]
+    shoutOutsByCheckInID(checkInID: ID!): [ShoutOut!]
+}
+
+input ShoutOutInput {
+    shoutOut: String!
+    checkInID: String
+    receiverIDs: [ID!]!
+}
+
+extend type Mutation {
+    createShoutOut(input:ShoutOutInput!): ID!
+}`, BuiltIn: false},
 	{Name: "../../../../schema/user.graphqls", Input: `enum Role {
     ADMIN
     USER
@@ -717,11 +987,6 @@ type User {
     organization: Organization
 }
 
-input UpdateUserPermissionsInput {
-    reportsTo: ID
-    role: ID
-}
-
 extend type Query {
     user: User!
     getUsersReportingTo: [User!]
@@ -730,7 +995,9 @@ extend type Query {
 extend type Mutation {
     deleteUser: Boolean
     leaveOrganization: Boolean
-    updateUserPermissions(userID: ID!, input: UpdateUserPermissionsInput!): User!
+    updateReportsTo(userID: ID!, reportsTo: ID): User!
+    updateRole(userID: ID!, role: Role!): User!
+    joinOrganization(organizationID: ID!): String!
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -766,6 +1033,36 @@ func (ec *executionContext) field_Mutation_createOrganizationAndJoin_args(ctx co
 		}
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createShoutOut_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.ShoutOutInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNShoutOutInput2githubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐShoutOutInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_joinOrganization_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["organizationID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("organizationID"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["organizationID"] = arg0
 	return args, nil
 }
 
@@ -829,7 +1126,52 @@ func (ec *executionContext) field_Mutation_signUpWithoutOrg_args(ctx context.Con
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_updateUserPermissions_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_submitCheckInResponses_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.SubmitCheckInResponsesInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNSubmitCheckInResponsesInput2githubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐSubmitCheckInResponsesInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_submitCheckInReview_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.SubmitCheckInReviewInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNSubmitCheckInReviewInput2githubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐSubmitCheckInReviewInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateOrgSettings_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.OrgSettingsInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNOrgSettingsInput2githubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐOrgSettingsInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateReportsTo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -841,15 +1183,39 @@ func (ec *executionContext) field_Mutation_updateUserPermissions_args(ctx contex
 		}
 	}
 	args["userID"] = arg0
-	var arg1 model.UpdateUserPermissionsInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg1, err = ec.unmarshalNUpdateUserPermissionsInput2githubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐUpdateUserPermissionsInput(ctx, tmp)
+	var arg1 *string
+	if tmp, ok := rawArgs["reportsTo"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("reportsTo"))
+		arg1, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["input"] = arg1
+	args["reportsTo"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateRole_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["userID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userID"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["userID"] = arg0
+	var arg1 model.Role
+	if tmp, ok := rawArgs["role"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("role"))
+		arg1, err = ec.unmarshalNRole2githubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐRole(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["role"] = arg1
 	return args, nil
 }
 
@@ -895,6 +1261,21 @@ func (ec *executionContext) field_Query_organizationInfo_args(ctx context.Contex
 		}
 	}
 	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_shoutOutsByCheckInID_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["checkInID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("checkInID"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["checkInID"] = arg0
 	return args, nil
 }
 
@@ -1029,6 +1410,8 @@ func (ec *executionContext) fieldContext_CheckIn_questions(ctx context.Context, 
 				return ec.fieldContext_Question_text(ctx, field)
 			case "responseType":
 				return ec.fieldContext_Question_responseType(ctx, field)
+			case "responses":
+				return ec.fieldContext_Question_responses(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Question", field.Name)
 		},
@@ -1068,6 +1451,66 @@ func (ec *executionContext) _CheckIn_user(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) fieldContext_CheckIn_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CheckIn",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "reportsTo":
+				return ec.fieldContext_User_reportsTo(ctx, field)
+			case "role":
+				return ec.fieldContext_User_role(ctx, field)
+			case "organization":
+				return ec.fieldContext_User_organization(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CheckIn_reviewer(ctx context.Context, field graphql.CollectedField, obj *model.CheckIn) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CheckIn_reviewer(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.CheckIn().Reviewer(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖgithubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CheckIn_reviewer(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "CheckIn",
 		Field:      field,
@@ -1217,6 +1660,135 @@ func (ec *executionContext) fieldContext_CheckIn_reviewedAt(ctx context.Context,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CheckIn_review(ctx context.Context, field graphql.CollectedField, obj *model.CheckIn) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CheckIn_review(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Review, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CheckIn_review(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CheckIn",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CheckIn_expiresAt(ctx context.Context, field graphql.CollectedField, obj *model.CheckIn) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CheckIn_expiresAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ExpiresAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CheckIn_expiresAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CheckIn",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CheckIn_expired(ctx context.Context, field graphql.CollectedField, obj *model.CheckIn) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CheckIn_expired(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Expired, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CheckIn_expired(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CheckIn",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
 		},
 	}
 	return fc, nil
@@ -1483,6 +2055,227 @@ func (ec *executionContext) fieldContext_Mutation_createCheckIn(ctx context.Cont
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_submitCheckInResponses(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_submitCheckInResponses(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().SubmitCheckInResponses(rctx, fc.Args["input"].(model.SubmitCheckInResponsesInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.CheckIn)
+	fc.Result = res
+	return ec.marshalNCheckIn2ᚖgithubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐCheckIn(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_submitCheckInResponses(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_CheckIn_id(ctx, field)
+			case "questions":
+				return ec.fieldContext_CheckIn_questions(ctx, field)
+			case "user":
+				return ec.fieldContext_CheckIn_user(ctx, field)
+			case "reviewer":
+				return ec.fieldContext_CheckIn_reviewer(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_CheckIn_createdAt(ctx, field)
+			case "completedAt":
+				return ec.fieldContext_CheckIn_completedAt(ctx, field)
+			case "reviewedAt":
+				return ec.fieldContext_CheckIn_reviewedAt(ctx, field)
+			case "review":
+				return ec.fieldContext_CheckIn_review(ctx, field)
+			case "expiresAt":
+				return ec.fieldContext_CheckIn_expiresAt(ctx, field)
+			case "expired":
+				return ec.fieldContext_CheckIn_expired(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CheckIn", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_submitCheckInResponses_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_submitCheckInReview(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_submitCheckInReview(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().SubmitCheckInReview(rctx, fc.Args["input"].(model.SubmitCheckInReviewInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.CheckIn)
+	fc.Result = res
+	return ec.marshalNCheckIn2ᚖgithubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐCheckIn(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_submitCheckInReview(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_CheckIn_id(ctx, field)
+			case "questions":
+				return ec.fieldContext_CheckIn_questions(ctx, field)
+			case "user":
+				return ec.fieldContext_CheckIn_user(ctx, field)
+			case "reviewer":
+				return ec.fieldContext_CheckIn_reviewer(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_CheckIn_createdAt(ctx, field)
+			case "completedAt":
+				return ec.fieldContext_CheckIn_completedAt(ctx, field)
+			case "reviewedAt":
+				return ec.fieldContext_CheckIn_reviewedAt(ctx, field)
+			case "review":
+				return ec.fieldContext_CheckIn_review(ctx, field)
+			case "expiresAt":
+				return ec.fieldContext_CheckIn_expiresAt(ctx, field)
+			case "expired":
+				return ec.fieldContext_CheckIn_expired(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CheckIn", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_submitCheckInReview_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_updateOrgSettings(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_updateOrgSettings(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateOrgSettings(rctx, fc.Args["input"].(model.OrgSettingsInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Organization)
+	fc.Result = res
+	return ec.marshalNOrganization2ᚖgithubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐOrganization(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_updateOrgSettings(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Organization_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Organization_name(ctx, field)
+			case "members":
+				return ec.fieldContext_Organization_members(ctx, field)
+			case "timezone":
+				return ec.fieldContext_Organization_timezone(ctx, field)
+			case "checkInWeekday":
+				return ec.fieldContext_Organization_checkInWeekday(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Organization", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_updateOrgSettings_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_createOrganizationAndJoin(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_createOrganizationAndJoin(ctx, field)
 	if err != nil {
@@ -1599,6 +2392,10 @@ func (ec *executionContext) fieldContext_Mutation_removeUserFromOrganization(ctx
 				return ec.fieldContext_Organization_name(ctx, field)
 			case "members":
 				return ec.fieldContext_Organization_members(ctx, field)
+			case "timezone":
+				return ec.fieldContext_Organization_timezone(ctx, field)
+			case "checkInWeekday":
+				return ec.fieldContext_Organization_checkInWeekday(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Organization", field.Name)
 		},
@@ -1654,6 +2451,61 @@ func (ec *executionContext) fieldContext_Mutation_deleteOrganization(ctx context
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Boolean does not have child fields")
 		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_createShoutOut(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_createShoutOut(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateShoutOut(rctx, fc.Args["input"].(model.ShoutOutInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_createShoutOut(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createShoutOut_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
 	}
 	return fc, nil
 }
@@ -1740,8 +2592,8 @@ func (ec *executionContext) fieldContext_Mutation_leaveOrganization(ctx context.
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_updateUserPermissions(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_updateUserPermissions(ctx, field)
+func (ec *executionContext) _Mutation_updateReportsTo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_updateReportsTo(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1754,7 +2606,7 @@ func (ec *executionContext) _Mutation_updateUserPermissions(ctx context.Context,
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateUserPermissions(rctx, fc.Args["userID"].(string), fc.Args["input"].(model.UpdateUserPermissionsInput))
+		return ec.resolvers.Mutation().UpdateReportsTo(rctx, fc.Args["userID"].(string), fc.Args["reportsTo"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1771,7 +2623,7 @@ func (ec *executionContext) _Mutation_updateUserPermissions(ctx context.Context,
 	return ec.marshalNUser2ᚖgithubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Mutation_updateUserPermissions(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_updateReportsTo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -1804,7 +2656,133 @@ func (ec *executionContext) fieldContext_Mutation_updateUserPermissions(ctx cont
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_updateUserPermissions_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_updateReportsTo_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_updateRole(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_updateRole(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateRole(rctx, fc.Args["userID"].(string), fc.Args["role"].(model.Role))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖgithubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_updateRole(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "reportsTo":
+				return ec.fieldContext_User_reportsTo(ctx, field)
+			case "role":
+				return ec.fieldContext_User_role(ctx, field)
+			case "organization":
+				return ec.fieldContext_User_organization(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_updateRole_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_joinOrganization(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_joinOrganization(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().JoinOrganization(rctx, fc.Args["organizationID"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_joinOrganization(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_joinOrganization_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -1954,6 +2932,94 @@ func (ec *executionContext) fieldContext_Organization_members(ctx context.Contex
 				return ec.fieldContext_User_organization(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Organization_timezone(ctx context.Context, field graphql.CollectedField, obj *model.Organization) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Organization_timezone(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Timezone, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Organization_timezone(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Organization",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Organization_checkInWeekday(ctx context.Context, field graphql.CollectedField, obj *model.Organization) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Organization_checkInWeekday(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CheckInWeekday, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Organization_checkInWeekday(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Organization",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -2133,12 +3199,83 @@ func (ec *executionContext) fieldContext_Query_checkIns(ctx context.Context, fie
 				return ec.fieldContext_CheckIn_questions(ctx, field)
 			case "user":
 				return ec.fieldContext_CheckIn_user(ctx, field)
+			case "reviewer":
+				return ec.fieldContext_CheckIn_reviewer(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_CheckIn_createdAt(ctx, field)
 			case "completedAt":
 				return ec.fieldContext_CheckIn_completedAt(ctx, field)
 			case "reviewedAt":
 				return ec.fieldContext_CheckIn_reviewedAt(ctx, field)
+			case "review":
+				return ec.fieldContext_CheckIn_review(ctx, field)
+			case "expiresAt":
+				return ec.fieldContext_CheckIn_expiresAt(ctx, field)
+			case "expired":
+				return ec.fieldContext_CheckIn_expired(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CheckIn", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_checkInsByReviewer(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_checkInsByReviewer(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().CheckInsByReviewer(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.CheckIn)
+	fc.Result = res
+	return ec.marshalOCheckIn2ᚕᚖgithubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐCheckInᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_checkInsByReviewer(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_CheckIn_id(ctx, field)
+			case "questions":
+				return ec.fieldContext_CheckIn_questions(ctx, field)
+			case "user":
+				return ec.fieldContext_CheckIn_user(ctx, field)
+			case "reviewer":
+				return ec.fieldContext_CheckIn_reviewer(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_CheckIn_createdAt(ctx, field)
+			case "completedAt":
+				return ec.fieldContext_CheckIn_completedAt(ctx, field)
+			case "reviewedAt":
+				return ec.fieldContext_CheckIn_reviewedAt(ctx, field)
+			case "review":
+				return ec.fieldContext_CheckIn_review(ctx, field)
+			case "expiresAt":
+				return ec.fieldContext_CheckIn_expiresAt(ctx, field)
+			case "expired":
+				return ec.fieldContext_CheckIn_expired(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type CheckIn", field.Name)
 		},
@@ -2191,12 +3328,20 @@ func (ec *executionContext) fieldContext_Query_checkInByID(ctx context.Context, 
 				return ec.fieldContext_CheckIn_questions(ctx, field)
 			case "user":
 				return ec.fieldContext_CheckIn_user(ctx, field)
+			case "reviewer":
+				return ec.fieldContext_CheckIn_reviewer(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_CheckIn_createdAt(ctx, field)
 			case "completedAt":
 				return ec.fieldContext_CheckIn_completedAt(ctx, field)
 			case "reviewedAt":
 				return ec.fieldContext_CheckIn_reviewedAt(ctx, field)
+			case "review":
+				return ec.fieldContext_CheckIn_review(ctx, field)
+			case "expiresAt":
+				return ec.fieldContext_CheckIn_expiresAt(ctx, field)
+			case "expired":
+				return ec.fieldContext_CheckIn_expired(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type CheckIn", field.Name)
 		},
@@ -2257,6 +3402,10 @@ func (ec *executionContext) fieldContext_Query_organization(ctx context.Context,
 				return ec.fieldContext_Organization_name(ctx, field)
 			case "members":
 				return ec.fieldContext_Organization_members(ctx, field)
+			case "timezone":
+				return ec.fieldContext_Organization_timezone(ctx, field)
+			case "checkInWeekday":
+				return ec.fieldContext_Organization_checkInWeekday(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Organization", field.Name)
 		},
@@ -2319,6 +3468,123 @@ func (ec *executionContext) fieldContext_Query_organizationInfo(ctx context.Cont
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_organizationInfo_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_shoutOuts(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_shoutOuts(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().ShoutOuts(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.ShoutOut)
+	fc.Result = res
+	return ec.marshalOShoutOut2ᚕᚖgithubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐShoutOutᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_shoutOuts(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_ShoutOut_id(ctx, field)
+			case "shoutOut":
+				return ec.fieldContext_ShoutOut_shoutOut(ctx, field)
+			case "user":
+				return ec.fieldContext_ShoutOut_user(ctx, field)
+			case "receivers":
+				return ec.fieldContext_ShoutOut_receivers(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_ShoutOut_createdAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ShoutOut", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_shoutOutsByCheckInID(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_shoutOutsByCheckInID(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().ShoutOutsByCheckInID(rctx, fc.Args["checkInID"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.ShoutOut)
+	fc.Result = res
+	return ec.marshalOShoutOut2ᚕᚖgithubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐShoutOutᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_shoutOutsByCheckInID(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_ShoutOut_id(ctx, field)
+			case "shoutOut":
+				return ec.fieldContext_ShoutOut_shoutOut(ctx, field)
+			case "user":
+				return ec.fieldContext_ShoutOut_user(ctx, field)
+			case "receivers":
+				return ec.fieldContext_ShoutOut_receivers(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_ShoutOut_createdAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ShoutOut", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_shoutOutsByCheckInID_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -2791,8 +4057,57 @@ func (ec *executionContext) fieldContext_Question_responseType(ctx context.Conte
 	return fc, nil
 }
 
-func (ec *executionContext) _Team_id(ctx context.Context, field graphql.CollectedField, obj *model.Team) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Team_id(ctx, field)
+func (ec *executionContext) _Question_responses(ctx context.Context, field graphql.CollectedField, obj *model.Question) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Question_responses(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Question().Responses(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Response)
+	fc.Result = res
+	return ec.marshalOResponse2ᚕᚖgithubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐResponseᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Question_responses(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Question",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Response_id(ctx, field)
+			case "position":
+				return ec.fieldContext_Response_position(ctx, field)
+			case "response":
+				return ec.fieldContext_Response_response(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Response", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Response_id(ctx context.Context, field graphql.CollectedField, obj *model.Response) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Response_id(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -2822,9 +4137,9 @@ func (ec *executionContext) _Team_id(ctx context.Context, field graphql.Collecte
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Team_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Response_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Team",
+		Object:     "Response",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -2835,8 +4150,8 @@ func (ec *executionContext) fieldContext_Team_id(ctx context.Context, field grap
 	return fc, nil
 }
 
-func (ec *executionContext) _Team_name(ctx context.Context, field graphql.CollectedField, obj *model.Team) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Team_name(ctx, field)
+func (ec *executionContext) _Response_position(ctx context.Context, field graphql.CollectedField, obj *model.Response) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Response_position(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -2849,7 +4164,51 @@ func (ec *executionContext) _Team_name(ctx context.Context, field graphql.Collec
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
+		return obj.Position, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Response_position(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Response",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Response_response(ctx context.Context, field graphql.CollectedField, obj *model.Response) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Response_response(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Response, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2866,14 +4225,266 @@ func (ec *executionContext) _Team_name(ctx context.Context, field graphql.Collec
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Team_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Response_response(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Team",
+		Object:     "Response",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ShoutOut_id(ctx context.Context, field graphql.CollectedField, obj *model.ShoutOut) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ShoutOut_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ShoutOut_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ShoutOut",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ShoutOut_shoutOut(ctx context.Context, field graphql.CollectedField, obj *model.ShoutOut) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ShoutOut_shoutOut(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ShoutOut, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ShoutOut_shoutOut(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ShoutOut",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ShoutOut_user(ctx context.Context, field graphql.CollectedField, obj *model.ShoutOut) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ShoutOut_user(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.User, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖgithubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ShoutOut_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ShoutOut",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "reportsTo":
+				return ec.fieldContext_User_reportsTo(ctx, field)
+			case "role":
+				return ec.fieldContext_User_role(ctx, field)
+			case "organization":
+				return ec.fieldContext_User_organization(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ShoutOut_receivers(ctx context.Context, field graphql.CollectedField, obj *model.ShoutOut) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ShoutOut_receivers(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Receivers, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚕᚖgithubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐUserᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ShoutOut_receivers(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ShoutOut",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "reportsTo":
+				return ec.fieldContext_User_reportsTo(ctx, field)
+			case "role":
+				return ec.fieldContext_User_role(ctx, field)
+			case "organization":
+				return ec.fieldContext_User_organization(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ShoutOut_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.ShoutOut) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ShoutOut_createdAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ShoutOut_createdAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ShoutOut",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
 		},
 	}
 	return fc, nil
@@ -3182,6 +4793,10 @@ func (ec *executionContext) fieldContext_User_organization(ctx context.Context, 
 				return ec.fieldContext_Organization_name(ctx, field)
 			case "members":
 				return ec.fieldContext_Organization_members(ctx, field)
+			case "timezone":
+				return ec.fieldContext_Organization_timezone(ctx, field)
+			case "checkInWeekday":
+				return ec.fieldContext_Organization_checkInWeekday(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Organization", field.Name)
 		},
@@ -4997,7 +6612,7 @@ func (ec *executionContext) unmarshalInputCreateOrganizationAndJoinInput(ctx con
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"name"}
+	fieldsInOrder := [...]string{"name", "timezone"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -5009,6 +6624,14 @@ func (ec *executionContext) unmarshalInputCreateOrganizationAndJoinInput(ctx con
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "timezone":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("timezone"))
+			it.Timezone, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5045,6 +6668,130 @@ func (ec *executionContext) unmarshalInputLogInInput(ctx context.Context, obj in
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
 			it.Password, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputOrgSettingsInput(ctx context.Context, obj interface{}) (model.OrgSettingsInput, error) {
+	var it model.OrgSettingsInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"timezone", "checkInWeekday"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "timezone":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("timezone"))
+			it.Timezone, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "checkInWeekday":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("checkInWeekday"))
+			it.CheckInWeekday, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputResponseInput(ctx context.Context, obj interface{}) (model.ResponseInput, error) {
+	var it model.ResponseInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"questionID", "position", "response"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "questionID":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("questionID"))
+			it.QuestionID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "position":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("position"))
+			it.Position, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "response":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("response"))
+			it.Response, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputShoutOutInput(ctx context.Context, obj interface{}) (model.ShoutOutInput, error) {
+	var it model.ShoutOutInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"shoutOut", "checkInID", "receiverIDs"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "shoutOut":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("shoutOut"))
+			it.ShoutOut, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "checkInID":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("checkInID"))
+			it.CheckInID, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "receiverIDs":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("receiverIDs"))
+			it.ReceiverIDs, err = ec.unmarshalNID2ᚕstringᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5121,7 +6868,7 @@ func (ec *executionContext) unmarshalInputSignUpWithoutOrgInput(ctx context.Cont
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"organizationName", "firstName", "lastName", "email", "password"}
+	fieldsInOrder := [...]string{"organizationName", "organizationTimezone", "firstName", "lastName", "email", "password"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -5133,6 +6880,14 @@ func (ec *executionContext) unmarshalInputSignUpWithoutOrgInput(ctx context.Cont
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("organizationName"))
 			it.OrganizationName, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "organizationTimezone":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("organizationTimezone"))
+			it.OrganizationTimezone, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5174,33 +6929,69 @@ func (ec *executionContext) unmarshalInputSignUpWithoutOrgInput(ctx context.Cont
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputUpdateUserPermissionsInput(ctx context.Context, obj interface{}) (model.UpdateUserPermissionsInput, error) {
-	var it model.UpdateUserPermissionsInput
+func (ec *executionContext) unmarshalInputSubmitCheckInResponsesInput(ctx context.Context, obj interface{}) (model.SubmitCheckInResponsesInput, error) {
+	var it model.SubmitCheckInResponsesInput
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"reportsTo", "role"}
+	fieldsInOrder := [...]string{"checkInID", "responses"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "reportsTo":
+		case "checkInID":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("reportsTo"))
-			it.ReportsTo, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("checkInID"))
+			it.CheckInID, err = ec.unmarshalNID2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-		case "role":
+		case "responses":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("role"))
-			it.Role, err = ec.unmarshalOID2ᚖstring(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("responses"))
+			it.Responses, err = ec.unmarshalNResponseInput2ᚕᚖgithubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐResponseInputᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputSubmitCheckInReviewInput(ctx context.Context, obj interface{}) (model.SubmitCheckInReviewInput, error) {
+	var it model.SubmitCheckInReviewInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"checkInID", "review"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "checkInID":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("checkInID"))
+			it.CheckInID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "review":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("review"))
+			it.Review, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5275,6 +7066,26 @@ func (ec *executionContext) _CheckIn(ctx context.Context, sel ast.SelectionSet, 
 				return innerFunc(ctx)
 
 			})
+		case "reviewer":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._CheckIn_reviewer(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
 		case "createdAt":
 
 			out.Values[i] = ec._CheckIn_createdAt(ctx, field, obj)
@@ -5290,6 +7101,24 @@ func (ec *executionContext) _CheckIn(ctx context.Context, sel ast.SelectionSet, 
 
 			out.Values[i] = ec._CheckIn_reviewedAt(ctx, field, obj)
 
+		case "review":
+
+			out.Values[i] = ec._CheckIn_review(ctx, field, obj)
+
+		case "expiresAt":
+
+			out.Values[i] = ec._CheckIn_expiresAt(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "expired":
+
+			out.Values[i] = ec._CheckIn_expired(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5362,6 +7191,33 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "submitCheckInResponses":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_submitCheckInResponses(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "submitCheckInReview":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_submitCheckInReview(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updateOrgSettings":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updateOrgSettings(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "createOrganizationAndJoin":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
@@ -5386,6 +7242,15 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 				return ec._Mutation_deleteOrganization(ctx, field)
 			})
 
+		case "createShoutOut":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createShoutOut(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "deleteUser":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
@@ -5398,10 +7263,28 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 				return ec._Mutation_leaveOrganization(ctx, field)
 			})
 
-		case "updateUserPermissions":
+		case "updateReportsTo":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_updateUserPermissions(ctx, field)
+				return ec._Mutation_updateReportsTo(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updateRole":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updateRole(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "joinOrganization":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_joinOrganization(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {
@@ -5462,6 +7345,20 @@ func (ec *executionContext) _Organization(ctx context.Context, sel ast.Selection
 				return innerFunc(ctx)
 
 			})
+		case "timezone":
+
+			out.Values[i] = ec._Organization_timezone(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "checkInWeekday":
+
+			out.Values[i] = ec._Organization_checkInWeekday(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5570,6 +7467,26 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Concurrently(i, func() graphql.Marshaler {
 				return rrm(innerCtx)
 			})
+		case "checkInsByReviewer":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_checkInsByReviewer(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
 		case "checkInByID":
 			field := field
 
@@ -5626,6 +7543,46 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
+		case "shoutOuts":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_shoutOuts(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
+		case "shoutOutsByCheckInID":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_shoutOutsByCheckInID(ctx, field)
 				return res
 			}
 
@@ -5717,32 +7674,91 @@ func (ec *executionContext) _Question(ctx context.Context, sel ast.SelectionSet,
 			out.Values[i] = ec._Question_id(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "position":
 
 			out.Values[i] = ec._Question_position(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "questionType":
 
 			out.Values[i] = ec._Question_questionType(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "text":
 
 			out.Values[i] = ec._Question_text(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "responseType":
 
 			out.Values[i] = ec._Question_responseType(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "responses":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Question_responses(ctx, field, obj)
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var responseImplementors = []string{"Response"}
+
+func (ec *executionContext) _Response(ctx context.Context, sel ast.SelectionSet, obj *model.Response) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, responseImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Response")
+		case "id":
+
+			out.Values[i] = ec._Response_id(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "position":
+
+			out.Values[i] = ec._Response_position(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "response":
+
+			out.Values[i] = ec._Response_response(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -5758,26 +7774,47 @@ func (ec *executionContext) _Question(ctx context.Context, sel ast.SelectionSet,
 	return out
 }
 
-var teamImplementors = []string{"Team"}
+var shoutOutImplementors = []string{"ShoutOut"}
 
-func (ec *executionContext) _Team(ctx context.Context, sel ast.SelectionSet, obj *model.Team) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, teamImplementors)
+func (ec *executionContext) _ShoutOut(ctx context.Context, sel ast.SelectionSet, obj *model.ShoutOut) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, shoutOutImplementors)
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("Team")
+			out.Values[i] = graphql.MarshalString("ShoutOut")
 		case "id":
 
-			out.Values[i] = ec._Team_id(ctx, field, obj)
+			out.Values[i] = ec._ShoutOut_id(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "name":
+		case "shoutOut":
 
-			out.Values[i] = ec._Team_name(ctx, field, obj)
+			out.Values[i] = ec._ShoutOut_shoutOut(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "user":
+
+			out.Values[i] = ec._ShoutOut_user(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "receivers":
+
+			out.Values[i] = ec._ShoutOut_receivers(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createdAt":
+
+			out.Values[i] = ec._ShoutOut_createdAt(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -6242,6 +8279,38 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 	return res
 }
 
+func (ec *executionContext) unmarshalNID2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNID2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNID2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNID2string(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
 func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
 	res, err := graphql.UnmarshalInt(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -6259,6 +8328,11 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 
 func (ec *executionContext) unmarshalNLogInInput2githubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐLogInInput(ctx context.Context, v interface{}) (model.LogInInput, error) {
 	res, err := ec.unmarshalInputLogInInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNOrgSettingsInput2githubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐOrgSettingsInput(ctx context.Context, v interface{}) (model.OrgSettingsInput, error) {
+	res, err := ec.unmarshalInputOrgSettingsInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -6344,6 +8418,38 @@ func (ec *executionContext) marshalNQuestion2ᚖgithubᚗcomᚋmikethehudᚋglan
 	return ec._Question(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNResponse2ᚖgithubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐResponse(ctx context.Context, sel ast.SelectionSet, v *model.Response) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Response(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNResponseInput2ᚕᚖgithubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐResponseInputᚄ(ctx context.Context, v interface{}) ([]*model.ResponseInput, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.ResponseInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNResponseInput2ᚖgithubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐResponseInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNResponseInput2ᚖgithubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐResponseInput(ctx context.Context, v interface{}) (*model.ResponseInput, error) {
+	res, err := ec.unmarshalInputResponseInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNResponseType2githubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐResponseType(ctx context.Context, v interface{}) (model.ResponseType, error) {
 	var res model.ResponseType
 	err := res.UnmarshalGQL(v)
@@ -6362,6 +8468,21 @@ func (ec *executionContext) unmarshalNRole2githubᚗcomᚋmikethehudᚋglancegg�
 
 func (ec *executionContext) marshalNRole2githubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐRole(ctx context.Context, sel ast.SelectionSet, v model.Role) graphql.Marshaler {
 	return v
+}
+
+func (ec *executionContext) marshalNShoutOut2ᚖgithubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐShoutOut(ctx context.Context, sel ast.SelectionSet, v *model.ShoutOut) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._ShoutOut(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNShoutOutInput2githubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐShoutOutInput(ctx context.Context, v interface{}) (model.ShoutOutInput, error) {
+	res, err := ec.unmarshalInputShoutOutInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNSignUpWithOrgInput2githubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐSignUpWithOrgInput(ctx context.Context, v interface{}) (model.SignUpWithOrgInput, error) {
@@ -6389,6 +8510,16 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
+func (ec *executionContext) unmarshalNSubmitCheckInResponsesInput2githubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐSubmitCheckInResponsesInput(ctx context.Context, v interface{}) (model.SubmitCheckInResponsesInput, error) {
+	res, err := ec.unmarshalInputSubmitCheckInResponsesInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNSubmitCheckInReviewInput2githubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐSubmitCheckInReviewInput(ctx context.Context, v interface{}) (model.SubmitCheckInReviewInput, error) {
+	res, err := ec.unmarshalInputSubmitCheckInReviewInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNTime2timeᚐTime(ctx context.Context, v interface{}) (time.Time, error) {
 	res, err := graphql.UnmarshalTime(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -6402,11 +8533,6 @@ func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel as
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) unmarshalNUpdateUserPermissionsInput2githubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐUpdateUserPermissionsInput(ctx context.Context, v interface{}) (model.UpdateUserPermissionsInput, error) {
-	res, err := ec.unmarshalInputUpdateUserPermissionsInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNUser2githubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v model.User) graphql.Marshaler {
@@ -6814,6 +8940,100 @@ func (ec *executionContext) marshalOOrganization2ᚖgithubᚗcomᚋmikethehudᚋ
 		return graphql.Null
 	}
 	return ec._Organization(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOResponse2ᚕᚖgithubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐResponseᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Response) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNResponse2ᚖgithubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐResponse(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalOShoutOut2ᚕᚖgithubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐShoutOutᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.ShoutOut) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNShoutOut2ᚖgithubᚗcomᚋmikethehudᚋglanceggᚋpackagesᚋserverᚋgraphᚋmodelᚐShoutOut(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {

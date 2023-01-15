@@ -13,12 +13,14 @@ import { Redirect } from "../../../components/redirect/Redirect"
 import { TextInput } from "../../../components/textInput/TextInput"
 import { useCreateOrganizationAndJoinMutation, useGetUserQuery } from "../../../lib/graphql/generated/generated"
 import { removeToken } from "../../../lib/jwt/jwt"
+import { getTimeZone } from "../../../lib/util/timezones"
 
 interface CreateOrgInputs {
     name: string
 }
 
 const OrgCreate: NextPage = () => {
+    const title = "Create Org"
     const { data, loading } = useGetUserQuery()
     const [createOrgAndJoin, result] = useCreateOrganizationAndJoinMutation({
         onCompleted: () => removeToken()
@@ -26,7 +28,7 @@ const OrgCreate: NextPage = () => {
     const { handleSubmit, register, formState: { errors } } = useForm<CreateOrgInputs>()
 
     if (loading || !data) {
-        return <LayoutLoading />
+        return <Layout title={title} loading />
     }
 
     if (data.user.organization) {
@@ -37,7 +39,8 @@ const OrgCreate: NextPage = () => {
         createOrgAndJoin({
             variables: {
                 input: {
-                    name: formData.name
+                    name: formData.name,
+                    timezone: getTimeZone()
                 }
             }
         })
@@ -46,11 +49,11 @@ const OrgCreate: NextPage = () => {
     if (result.data) {
         // invalidate token to make sure we receive auth token
         removeToken()
-        return <Redirect to="/home" />
+        return <Redirect to="/org" />
     }
 
     return (
-        <Layout>
+        <Layout title={title}>
             <Container>
                 <Section>
                     <h1>Create Organisation</h1>

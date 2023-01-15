@@ -1,0 +1,7 @@
+mutation SubmitCheckInReview($input: SubmitCheckInReviewInput!) {
+    submitCheckInReview(input:$input) {
+        id
+        reviewedAt
+        review
+    }
+}

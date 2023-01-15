@@ -1,0 +1,6 @@
+mutation UpdateReportsTo($userID: ID!, $reportsTo: ID) {
+    updateReportsTo(userID:$userID, reportsTo:$reportsTo) {
+        id
+        reportsTo
+    }
+}

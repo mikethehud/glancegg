@@ -1,20 +1,16 @@
-import { NextPage } from "next";
-import React, { useEffect } from "react";
+import React from "react";
 import { Button } from "../../components/button/Button";
 import { FormElement } from "../../components/formElement/FormElement";
-import { Container } from "../../components/container/Container";
 import { TextInput } from "../../components/textInput/TextInput";
-import Link from "next/link";
-import { TextLink } from "../../components/textLink/TextLink";
 import styles from "./SignupForm.module.css"
 import { SubmitHandler, useForm } from "react-hook-form";
-import { useSignUpWithOrgMutation, useSignUpWithoutOrgMutation } from "../../lib/graphql/generated/generated";
+import { useSignUpWithoutOrgMutation } from "../../lib/graphql/generated/generated";
 import { FormError } from "../../components/formError/FormError";
-import { useRouter } from "next/router";
-import { getToken } from "../../lib/jwt/jwt";
-import { LayoutPublic } from "../../components/layout/LayoutPublic";
 import { Card } from "../../components/card/Card";
 import { Section } from "../../components/container/Section";
+import { getErrorMessage } from "../../lib/util/errors";
+import { validateEmail, validatePasswordsEqual } from "../../lib/util/validation";
+import { getTimeZone } from "../../lib/util/timezones";
 
 type Inputs = {
     email: string,
@@ -41,30 +37,18 @@ export const SignupForm = ({ onSuccess }: SignupProps) => {
                     firstName: formData.firstName,
                     lastName: formData.lastName,
                     password: formData.password,
-                    organizationName: formData.organizationName
+                    organizationName: formData.organizationName,
+                    organizationTimezone: getTimeZone()
                 }
             }
         })
     }
 
-    const getErrorMessage = (code: string): string => {
-        switch (code) {
-            case "USER_NOT_UNIQUE":
-                return "A user with this email already exists."
-            case "VALIDATION_ERROR":
-                return "Some of those fields don't look right. Please try again."
-            default:
-                return "Unknown error."
-        }
-    }
-
-    const validatePasswordsEqual = (val: string): boolean => {
-        return watch('password') === val
-    }
-
     if (data) {
         onSuccess()
     }
+
+    console.log(errors)
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
@@ -77,14 +61,14 @@ export const SignupForm = ({ onSuccess }: SignupProps) => {
                         <TextInput
                             placeholder="Enter First Name"
                             error={errors.firstName && errors.firstName.message}
-                            {...register("firstName", { required: true })}
+                            {...register("firstName", { required: "This field is required." })}
                         />
                     </FormElement>
                     <FormElement label="Last Name">
                         <TextInput
                             placeholder="Enter Last Name"
                             error={errors.lastName && errors.lastName.message}
-                            {...register("lastName", { required: true })}
+                            {...register("lastName", { required: "This field is required." })}
                         />
                     </FormElement>
                 </Section>
@@ -94,7 +78,10 @@ export const SignupForm = ({ onSuccess }: SignupProps) => {
                             type="email"
                             placeholder="Enter Email"
                             error={errors.email && errors.email.message}
-                            {...register("email", { required: true })}
+                            {...register("email", {
+                                required: "This field is required.",
+                                validate: validateEmail
+                            })}
                         />
                     </FormElement>
                 </Section>
@@ -104,7 +91,13 @@ export const SignupForm = ({ onSuccess }: SignupProps) => {
                             type="password"
                             placeholder="Enter Password"
                             error={errors.password && errors.password.message}
-                            {...register("password", { required: true, minLength: 8 })}
+                            {...register("password", {
+                                required: "This field is required.",
+                                minLength: {
+                                    value: 8,
+                                    message: "Passwords must be at least 8 characters long."
+                                }
+                            })}
                         />
                     </FormElement>
                     <FormElement label="Confirm Password">
@@ -112,7 +105,10 @@ export const SignupForm = ({ onSuccess }: SignupProps) => {
                             type="password"
                             placeholder="Confirm Password"
                             error={errors.passwordConfirm && errors.passwordConfirm.message}
-                            {...register("passwordConfirm", { required: true, minLength: 8, validate: validatePasswordsEqual })}
+                            {...register("passwordConfirm", {
+                                required: "This field is required.",
+                                validate: val => validatePasswordsEqual(watch('password'), val)
+                            })}
                         />
                     </FormElement>
                 </Section>
@@ -126,15 +122,17 @@ export const SignupForm = ({ onSuccess }: SignupProps) => {
                         <TextInput
                             placeholder="Organization Name"
                             error={errors.organizationName && errors.organizationName.message}
-                            {...register("organizationName", { required: true })}
+                            {...register("organizationName", {
+                                required: { value: true, message: "Organization name is required" }
+                            })}
                         />
                     </FormElement>
                 </Section>
             </Card>
             {error && <FormError error={getErrorMessage(error.message)} />}
-            <Section>
+            <div>
                 <Button primary loading={loading} type="submit">Create Your Account</Button>
-            </Section>
+            </div>
         </form>
     )
 }

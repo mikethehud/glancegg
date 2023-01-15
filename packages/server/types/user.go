@@ -24,6 +24,17 @@ func (r *Role) ToModel() model.Role {
 	}
 }
 
+func RoleFromModelRole(r model.Role) Role {
+	switch r {
+	case model.RoleAdmin:
+		return AdminRole
+	case model.RoleUser:
+		return UserRole
+	default:
+		return ""
+	}
+}
+
 func RoleFromString(s string) (Role, error) {
 	switch s {
 	case "ADMIN":

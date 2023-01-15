@@ -32,18 +32,6 @@ const (
 	ResponseTypeScale ResponseType = "SCALE"
 )
 
-func (r ResponseType) toTableName() string {
-	switch r {
-	case ResponseTypeText:
-		return "text_responses"
-	case ResponseTypeTask:
-		return "task_responses"
-	case ResponseTypeScale:
-		return "scale_responses"
-	}
-	return ""
-}
-
 type QuestionType struct {
 	Type         string
 	Text         string

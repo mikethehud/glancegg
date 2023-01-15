@@ -1,22 +1,25 @@
 @import url('./fonts.css');
 
 :root {
-  --color-black: #432359;
-  --color-black-accent: #5E2D73;
-  --color-white: #fff;
-  --color-white-accent: #ebebeb;
-  --color-yellow: #00ff47;
-  --color-blue: #0077ff;
-  --color-gray: #7c508f;
-  --color-red: #ee5949;
-  --color-green: #bdbd7d;
+  --color-black: rgb(45, 40, 62);
+  --color-black-accent: rgb(86, 79, 111);
+  --color-white: rgb(255, 255, 255);
+  --color-white-accent: rgb(165, 180, 202);
+  --color-yellow: rgb(0, 255, 71);
+  --color-blue: rgb(0, 119, 255);
+  --color-red: rgb(238, 89, 73);
+  --color-green: rgb(189, 189, 125);
+
+  --color-highlight: rgb(128, 43, 177);
+  --color-lowlight: rgb(76, 73, 93);
 
   --color-background: var(--color-black);
   --color-background-accent: var(--color-black-accent);
   --color-text: var(--color-white);
+  --color-text-accent: var(--color-white-accent);
   --color-link: var(--color-blue);
 
-  --text-size-xl: 32px;
+  --text-size-xl: 36px;
   --text-size-l: 26px;
   --text-size-m: 20px;
   --text-size-s: 16px;
@@ -34,8 +37,7 @@
   --border-radius: 4px;
   --border-width: 2px;
 
-  --shadow-preanim: rgba(0, 0, 0, 0.0) 0px 1px 2px;
-  --shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  --shadow: rgba(0, 0, 0, 0.4) 0px 5px 15px;
 
   --font-family: "Sofia Sans";
 }
@@ -55,11 +57,13 @@ body,
 }
 
 a {
+  font-weight: bold;
   color: var(--color-link);
   text-decoration: none;
 }
 
 h1, h2, h3, h4, h5 {
+  position: relative;
   margin: 0;
 }
 
@@ -75,10 +79,19 @@ p {
   margin-block-start: .5em;
   margin-block-end: .5em;
   line-height: 1.2em;
+  color: var(--color-text-accent);
 }
 
 * {
   box-sizing: border-box;
+}
+
+code {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: var(--text-size-s);
+  background-color: var(--color-background-accent);
+  padding: var(--space-xxs);
+  border-radius: var(--border-radius);
 }
 
 .text-small {

@@ -1,0 +1,102 @@
+.wrapper {
+    background-color: var(--color-lowlight);
+    border: 2px solid var(--color-text-accent);
+    height: 45px;
+    padding: 0 var(--space-xs);
+    border-radius: var(--border-radius);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    cursor: pointer;
+}
+
+.wrapper select {
+    border-color: transparent;
+}
+
+.selected {
+    display: flex;
+    flex-direction: row;
+    gap: var(--space-xs);
+}
+
+.selectedOption {
+    font-size: var(--text-size-s);
+    padding-left: var(--space-xs);
+    background-color: var(--color-background-accent);
+    color: var(--color-background);
+    border-radius: var(--border-radius);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.selectedOption .remove {
+    font-size: var(--text-size-l);
+    height: 100%;
+    padding: 0 var(--space-xxs);
+    cursor: pointer;
+}
+
+.select {
+    position: relative;
+}
+
+.popover {
+    background-color: var(--color-text-accent);
+    color: var(--color-text);
+    border-radius: var(--border-radius);
+    position: absolute;
+    top: 40px;
+    left: 50%;
+    width: calc(100% + 4px);
+    margin-left: calc(-50% - 2px);
+    z-index: 1;
+    font-size: var(--text-size-s);
+    border: 2px solid var(--color-text-accent);
+    border-top-right-radius: 0;
+    border-top-left-radius: 0;
+}
+
+.option {
+    font-weight: bold;
+    color: var(--color-background);
+    padding: var(--space-s);
+    border-top: 1px solid var(--color-text);
+}
+
+.option:hover {
+    background-color: var(--color-highlight);
+    color: var(--color-white);
+}
+
+.chevron {
+    font-size: var(--text-size-xs);
+    color: var(--color-text);
+    margin-right: var(--space-xxs);
+}
+
+.negative {
+    background-color: var(--color-text-accent);
+}
+
+.negative .selected, .negative .chevron {
+    color: var(--color-background);
+}
+
+.negative .selectedOption {
+    background-color: var(--color-lowlight);
+    color: var(--color-text);
+}
+
+.small.wrapper {
+    height: 45px;
+    padding: 0 var(--space-xs);
+    gap: var(--space-xxs);
+}
+
+.small .selected {
+    font-size: var(--text-size-s);
+}

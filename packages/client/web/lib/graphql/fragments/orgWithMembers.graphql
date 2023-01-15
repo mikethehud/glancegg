@@ -1,6 +1,8 @@
 fragment OrgWithMembers on Organization {
     id
     name
+    timezone
+    checkInWeekday
     members {
         ...BaseUserData
     }

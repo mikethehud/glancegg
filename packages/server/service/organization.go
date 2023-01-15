@@ -37,24 +37,20 @@ func (s *Service) RemoveUserFromOrganization(ctx context.Context, userID string,
 func (s *Service) DeleteOrganization(ctx context.Context) error {
 	orgID := utils.ContextOrgID(ctx)
 
-	if !utils.IsAdmin(ctx) {
-		return errors.New(utils.ErrorNoAccess)
-	}
-
 	tx := s.dbx.MustBegin()
 
 	// remove all references
 	err := queries.RemoveOrganizationFromUsers(ctx, tx, orgID)
 	if err != nil {
-		tx.Rollback()
-		return err
+		_ = tx.Rollback()
+		return utils.InternalError(s.Logger, err, "error removing organization from users")
 	}
 
 	// remove org
 	err = queries.DeleteOrganization(ctx, tx, orgID)
 	if err != nil {
-		tx.Rollback()
-		return err
+		_ = tx.Rollback()
+		return utils.InternalError(s.Logger, err, "error deleting organization")
 	}
 
 	err = tx.Commit()
@@ -64,10 +60,38 @@ func (s *Service) DeleteOrganization(ctx context.Context) error {
 	return nil
 }
 
-func (s *Service) createOrganization(ctx context.Context, q queries.QueryRunner, name string) (string, error) {
+func (s *Service) UpdateOrgSettings(ctx context.Context, orgID, timeZone string, checkInWeekday int) (*types.Organization, error) {
+	tx := s.dbx.MustBegin()
+	o, err := queries.UpdateOrgSettings(ctx, tx, orgID, timeZone, checkInWeekday)
+	if err != nil {
+		_ = tx.Rollback()
+		return nil, utils.InternalError(s.Logger, err, "error updating org settings")
+	}
+
+	expiresAt, err := utils.GetNextExpiration(timeZone, checkInWeekday)
+	if err != nil {
+		_ = tx.Rollback()
+		return nil, utils.InternalError(s.Logger, err, "error updating org settings")
+	}
+
+	_, err = queries.ExtendCheckInExpiresByOrganizationID(ctx, tx, orgID, expiresAt)
+	if err != nil {
+		_ = tx.Rollback()
+		return nil, utils.InternalError(s.Logger, err, "error extending expires by")
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return nil, utils.InternalError(s.Logger, err, "error committing update org transaction")
+	}
+	return o, nil
+}
+
+func (s *Service) createOrganization(ctx context.Context, q queries.QueryRunner, name string, timezone string) (string, error) {
 	// create org
 	org := types.Organization{
-		Name: name,
+		Name:     name,
+		Timezone: timezone,
 	}
 	err := s.valid.Struct(org)
 	if err != nil {

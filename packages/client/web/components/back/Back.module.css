@@ -1,0 +1,11 @@
+.back {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    left: calc(var(--space-l) * -1);
+    font-size: var(--text-size-l);
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--space-m);
+}

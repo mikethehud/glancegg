@@ -1,0 +1,7 @@
+mutation UpdateOrgSettings($input:OrgSettingsInput!) {
+    updateOrgSettings(input:$input) {
+        id
+        timezone
+        checkInWeekday
+    }
+}

@@ -1,0 +1,6 @@
+mutation SubmitCheckInResponses($input: SubmitCheckInResponsesInput!) {
+    submitCheckInResponses(input:$input) {
+        id
+        completedAt
+    }
+}

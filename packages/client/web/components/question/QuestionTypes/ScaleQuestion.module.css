@@ -1,0 +1,33 @@
+.scale {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: var(--space-s);
+}
+
+.number {
+    text-align: center;
+    width: var(--space-xl);
+    height: var(--space-xl);
+    border-radius: var(--space-xl);
+    line-height: calc(var(--space-xl) - 2px);
+    border: 2px solid var(--color-lowlight);
+    font-weight: bold;
+}
+
+.number.active {
+    border-color: var(--color-text);
+    background-color: var(--color-text);
+    color: var(--color-background);
+}
+
+.number:hover {
+    cursor: pointer;
+    background-color: var(--color-lowlight);
+    color: var(--color-text);
+}
+
+.number.active:hover {
+    background-color: var(--color-text);
+    color: var(--color-background);
+}

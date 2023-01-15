@@ -1,0 +1,3 @@
+mutation JoinOrganization($orgID:ID!) {
+    joinOrganization(organizationID:$orgID)
+}

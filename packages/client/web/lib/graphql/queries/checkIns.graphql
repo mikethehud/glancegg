@@ -4,9 +4,7 @@ query GetCheckIns {
         createdAt
         completedAt
         reviewedAt
-        user {
-            firstName
-            lastName
-        }
+        expiresAt
+        expired
     }
 }

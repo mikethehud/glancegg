@@ -20,9 +20,13 @@ export type CheckIn = {
   __typename?: 'CheckIn';
   completedAt?: Maybe<Scalars['Time']>;
   createdAt: Scalars['Time'];
+  expired: Scalars['Boolean'];
+  expiresAt: Scalars['Time'];
   id: Scalars['ID'];
   questions: Array<Question>;
+  review?: Maybe<Scalars['String']>;
   reviewedAt?: Maybe<Scalars['Time']>;
+  reviewer: User;
   user: User;
 };
 
@@ -32,6 +36,7 @@ export type CreateCheckInInput = {
 
 export type CreateOrganizationAndJoinInput = {
   name: Scalars['String'];
+  timezone: Scalars['String'];
 };
 
 export type LogInInput = {
@@ -43,15 +48,21 @@ export type Mutation = {
   __typename?: 'Mutation';
   createCheckIn: Scalars['String'];
   createOrganizationAndJoin: User;
+  createShoutOut: Scalars['ID'];
   deleteOrganization?: Maybe<Scalars['Boolean']>;
   deleteUser?: Maybe<Scalars['Boolean']>;
+  joinOrganization: Scalars['String'];
   leaveOrganization?: Maybe<Scalars['Boolean']>;
   logIn: Scalars['String'];
   logOut?: Maybe<Scalars['Boolean']>;
   removeUserFromOrganization: Organization;
   signUpWithOrg: Scalars['String'];
   signUpWithoutOrg: Scalars['String'];
-  updateUserPermissions: User;
+  submitCheckInResponses: CheckIn;
+  submitCheckInReview: CheckIn;
+  updateOrgSettings: Organization;
+  updateReportsTo: User;
+  updateRole: User;
 };
 
 
@@ -62,6 +73,16 @@ export type MutationCreateCheckInArgs = {
 
 export type MutationCreateOrganizationAndJoinArgs = {
   input: CreateOrganizationAndJoinInput;
+};
+
+
+export type MutationCreateShoutOutArgs = {
+  input: ShoutOutInput;
+};
+
+
+export type MutationJoinOrganizationArgs = {
+  organizationID: Scalars['ID'];
 };
 
 
@@ -85,16 +106,44 @@ export type MutationSignUpWithoutOrgArgs = {
 };
 
 
-export type MutationUpdateUserPermissionsArgs = {
-  input: UpdateUserPermissionsInput;
+export type MutationSubmitCheckInResponsesArgs = {
+  input: SubmitCheckInResponsesInput;
+};
+
+
+export type MutationSubmitCheckInReviewArgs = {
+  input: SubmitCheckInReviewInput;
+};
+
+
+export type MutationUpdateOrgSettingsArgs = {
+  input: OrgSettingsInput;
+};
+
+
+export type MutationUpdateReportsToArgs = {
+  reportsTo?: InputMaybe<Scalars['ID']>;
   userID: Scalars['ID'];
+};
+
+
+export type MutationUpdateRoleArgs = {
+  role: Role;
+  userID: Scalars['ID'];
+};
+
+export type OrgSettingsInput = {
+  checkInWeekday: Scalars['Int'];
+  timezone: Scalars['String'];
 };
 
 export type Organization = {
   __typename?: 'Organization';
+  checkInWeekday: Scalars['Int'];
   id: Scalars['ID'];
   members: Array<User>;
   name: Scalars['String'];
+  timezone: Scalars['String'];
 };
 
 export type OrganizationInfo = {
@@ -108,9 +157,12 @@ export type Query = {
   authToken: Scalars['String'];
   checkInByID: CheckIn;
   checkIns?: Maybe<Array<CheckIn>>;
+  checkInsByReviewer?: Maybe<Array<CheckIn>>;
   getUsersReportingTo?: Maybe<Array<User>>;
   organization?: Maybe<Organization>;
   organizationInfo: OrganizationInfo;
+  shoutOuts?: Maybe<Array<ShoutOut>>;
+  shoutOutsByCheckInID?: Maybe<Array<ShoutOut>>;
   user: User;
 };
 
@@ -124,13 +176,32 @@ export type QueryOrganizationInfoArgs = {
   id: Scalars['String'];
 };
 
+
+export type QueryShoutOutsByCheckInIdArgs = {
+  checkInID: Scalars['ID'];
+};
+
 export type Question = {
   __typename?: 'Question';
   id: Scalars['ID'];
   position: Scalars['Int'];
   questionType: Scalars['String'];
   responseType: ResponseType;
+  responses?: Maybe<Array<Response>>;
   text: Scalars['String'];
+};
+
+export type Response = {
+  __typename?: 'Response';
+  id: Scalars['ID'];
+  position: Scalars['Int'];
+  response: Scalars['String'];
+};
+
+export type ResponseInput = {
+  position: Scalars['Int'];
+  questionID: Scalars['ID'];
+  response: Scalars['String'];
 };
 
 export enum ResponseType {
@@ -143,6 +214,21 @@ export enum Role {
   Admin = 'ADMIN',
   User = 'USER'
 }
+
+export type ShoutOut = {
+  __typename?: 'ShoutOut';
+  createdAt: Scalars['Time'];
+  id: Scalars['ID'];
+  receivers: Array<User>;
+  shoutOut: Scalars['String'];
+  user: User;
+};
+
+export type ShoutOutInput = {
+  checkInID?: InputMaybe<Scalars['String']>;
+  receiverIDs: Array<Scalars['ID']>;
+  shoutOut: Scalars['String'];
+};
 
 export type SignUpWithOrgInput = {
   email: Scalars['String'];
@@ -157,18 +243,18 @@ export type SignUpWithoutOrgInput = {
   firstName: Scalars['String'];
   lastName: Scalars['String'];
   organizationName: Scalars['String'];
+  organizationTimezone: Scalars['String'];
   password: Scalars['String'];
 };
 
-export type Team = {
-  __typename?: 'Team';
-  id: Scalars['ID'];
-  name: Scalars['String'];
+export type SubmitCheckInResponsesInput = {
+  checkInID: Scalars['ID'];
+  responses: Array<ResponseInput>;
 };
 
-export type UpdateUserPermissionsInput = {
-  reportsTo?: InputMaybe<Scalars['ID']>;
-  role?: InputMaybe<Scalars['ID']>;
+export type SubmitCheckInReviewInput = {
+  checkInID: Scalars['ID'];
+  review: Scalars['String'];
 };
 
 export type User = {
@@ -182,16 +268,27 @@ export type User = {
   role: Role;
 };
 
+export type BaseCheckInDataFragment = { __typename?: 'CheckIn', id: string, createdAt: any, completedAt?: any | null, reviewedAt?: any | null, expiresAt: any, expired: boolean, reviewer: { __typename?: 'User', id: string, firstName: string, lastName: string } };
+
+export type BaseQuestionDataFragment = { __typename?: 'Question', id: string, text: string, questionType: string, responseType: ResponseType };
+
 export type BaseUserDataFragment = { __typename?: 'User', id: string, firstName: string, lastName: string, email: string, role: Role, reportsTo?: string | null };
 
-export type OrgWithMembersFragment = { __typename?: 'Organization', id: string, name: string, members: Array<{ __typename?: 'User', id: string, firstName: string, lastName: string, email: string, role: Role, reportsTo?: string | null }> };
+export type OrgWithMembersFragment = { __typename?: 'Organization', id: string, name: string, timezone: string, checkInWeekday: number, members: Array<{ __typename?: 'User', id: string, firstName: string, lastName: string, email: string, role: Role, reportsTo?: string | null }> };
 
 export type CreateOrganizationAndJoinMutationVariables = Exact<{
   input: CreateOrganizationAndJoinInput;
 }>;
 
 
-export type CreateOrganizationAndJoinMutation = { __typename?: 'Mutation', createOrganizationAndJoin: { __typename?: 'User', id: string, role: Role, organization?: { __typename?: 'Organization', id: string, name: string, members: Array<{ __typename?: 'User', id: string, firstName: string, lastName: string, email: string, role: Role, reportsTo?: string | null }> } | null } };
+export type CreateOrganizationAndJoinMutation = { __typename?: 'Mutation', createOrganizationAndJoin: { __typename?: 'User', id: string, role: Role, organization?: { __typename?: 'Organization', id: string, name: string, timezone: string, checkInWeekday: number, members: Array<{ __typename?: 'User', id: string, firstName: string, lastName: string, email: string, role: Role, reportsTo?: string | null }> } | null } };
+
+export type CreateShoutOutMutationVariables = Exact<{
+  input: ShoutOutInput;
+}>;
+
+
+export type CreateShoutOutMutation = { __typename?: 'Mutation', createShoutOut: string };
 
 export type DeleteOrganizationMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -202,6 +299,13 @@ export type DeleteUserMutationVariables = Exact<{ [key: string]: never; }>;
 
 
 export type DeleteUserMutation = { __typename?: 'Mutation', deleteUser?: boolean | null };
+
+export type JoinOrganizationMutationVariables = Exact<{
+  orgID: Scalars['ID'];
+}>;
+
+
+export type JoinOrganizationMutation = { __typename?: 'Mutation', joinOrganization: string };
 
 export type LeaveOrganizationMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -225,7 +329,7 @@ export type RemoveUserFromOrganizationMutationVariables = Exact<{
 }>;
 
 
-export type RemoveUserFromOrganizationMutation = { __typename?: 'Mutation', removeUserFromOrganization: { __typename?: 'Organization', id: string, name: string, members: Array<{ __typename?: 'User', id: string, firstName: string, lastName: string, email: string, role: Role, reportsTo?: string | null }> } };
+export type RemoveUserFromOrganizationMutation = { __typename?: 'Mutation', removeUserFromOrganization: { __typename?: 'Organization', id: string, name: string, timezone: string, checkInWeekday: number, members: Array<{ __typename?: 'User', id: string, firstName: string, lastName: string, email: string, role: Role, reportsTo?: string | null }> } };
 
 export type SignUpWithoutOrgMutationVariables = Exact<{
   input: SignUpWithoutOrgInput;
@@ -241,13 +345,42 @@ export type SignUpWithOrgMutationVariables = Exact<{
 
 export type SignUpWithOrgMutation = { __typename?: 'Mutation', signUpWithOrg: string };
 
-export type UpdateUserPermissionsMutationVariables = Exact<{
-  userID: Scalars['ID'];
-  input: UpdateUserPermissionsInput;
+export type SubmitCheckInResponsesMutationVariables = Exact<{
+  input: SubmitCheckInResponsesInput;
 }>;
 
 
-export type UpdateUserPermissionsMutation = { __typename?: 'Mutation', updateUserPermissions: { __typename?: 'User', id: string, role: Role, reportsTo?: string | null } };
+export type SubmitCheckInResponsesMutation = { __typename?: 'Mutation', submitCheckInResponses: { __typename?: 'CheckIn', id: string, completedAt?: any | null } };
+
+export type SubmitCheckInReviewMutationVariables = Exact<{
+  input: SubmitCheckInReviewInput;
+}>;
+
+
+export type SubmitCheckInReviewMutation = { __typename?: 'Mutation', submitCheckInReview: { __typename?: 'CheckIn', id: string, reviewedAt?: any | null, review?: string | null } };
+
+export type UpdateOrgSettingsMutationVariables = Exact<{
+  input: OrgSettingsInput;
+}>;
+
+
+export type UpdateOrgSettingsMutation = { __typename?: 'Mutation', updateOrgSettings: { __typename?: 'Organization', id: string, timezone: string, checkInWeekday: number } };
+
+export type UpdateReportsToMutationVariables = Exact<{
+  userID: Scalars['ID'];
+  reportsTo?: InputMaybe<Scalars['ID']>;
+}>;
+
+
+export type UpdateReportsToMutation = { __typename?: 'Mutation', updateReportsTo: { __typename?: 'User', id: string, reportsTo?: string | null } };
+
+export type UpdateRoleMutationVariables = Exact<{
+  userID: Scalars['ID'];
+  role: Role;
+}>;
+
+
+export type UpdateRoleMutation = { __typename?: 'Mutation', updateRole: { __typename?: 'User', id: string, role: Role } };
 
 export type GetAuthTokenQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -259,17 +392,29 @@ export type GetCheckInByIdQueryVariables = Exact<{
 }>;
 
 
-export type GetCheckInByIdQuery = { __typename?: 'Query', checkInByID: { __typename?: 'CheckIn', id: string, createdAt: any, completedAt?: any | null, reviewedAt?: any | null, questions: Array<{ __typename?: 'Question', id: string, text: string, questionType: string, responseType: ResponseType }> } };
+export type GetCheckInByIdQuery = { __typename?: 'Query', checkInByID: { __typename?: 'CheckIn', id: string, createdAt: any, completedAt?: any | null, reviewedAt?: any | null, expiresAt: any, expired: boolean, questions: Array<{ __typename?: 'Question', id: string, text: string, questionType: string, responseType: ResponseType }>, reviewer: { __typename?: 'User', id: string, firstName: string, lastName: string } } };
+
+export type GetCheckInByIdWithResponsesQueryVariables = Exact<{
+  checkInID: Scalars['ID'];
+}>;
+
+
+export type GetCheckInByIdWithResponsesQuery = { __typename?: 'Query', checkInByID: { __typename?: 'CheckIn', review?: string | null, id: string, createdAt: any, completedAt?: any | null, reviewedAt?: any | null, expiresAt: any, expired: boolean, user: { __typename?: 'User', id: string }, questions: Array<{ __typename?: 'Question', id: string, text: string, questionType: string, responseType: ResponseType, responses?: Array<{ __typename: 'Response', id: string, response: string }> | null }>, reviewer: { __typename?: 'User', id: string, firstName: string, lastName: string } } };
 
 export type GetCheckInsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetCheckInsQuery = { __typename?: 'Query', checkIns?: Array<{ __typename?: 'CheckIn', id: string, createdAt: any, completedAt?: any | null, reviewedAt?: any | null, user: { __typename?: 'User', firstName: string, lastName: string } }> | null };
+export type GetCheckInsQuery = { __typename?: 'Query', checkIns?: Array<{ __typename?: 'CheckIn', id: string, createdAt: any, completedAt?: any | null, reviewedAt?: any | null, expiresAt: any, expired: boolean }> | null };
+
+export type GetCheckInsByReviewerQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetCheckInsByReviewerQuery = { __typename?: 'Query', checkInsByReviewer?: Array<{ __typename?: 'CheckIn', id: string, createdAt: any, completedAt?: any | null, reviewedAt?: any | null, expiresAt: any, expired: boolean, user: { __typename?: 'User', firstName: string, lastName: string } }> | null };
 
 export type GetOrganizationAndMembersQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetOrganizationAndMembersQuery = { __typename?: 'Query', organization?: { __typename?: 'Organization', id: string, name: string, members: Array<{ __typename?: 'User', id: string, firstName: string, lastName: string, email: string, role: Role, reportsTo?: string | null }> } | null };
+export type GetOrganizationAndMembersQuery = { __typename?: 'Query', organization?: { __typename?: 'Organization', id: string, name: string, timezone: string, checkInWeekday: number, members: Array<{ __typename?: 'User', id: string, firstName: string, lastName: string, email: string, role: Role, reportsTo?: string | null }> } | null };
 
 export type GetOrganizationInfoQueryVariables = Exact<{
   orgID: Scalars['String'];
@@ -278,11 +423,46 @@ export type GetOrganizationInfoQueryVariables = Exact<{
 
 export type GetOrganizationInfoQuery = { __typename?: 'Query', organizationInfo: { __typename?: 'OrganizationInfo', id: string, name: string } };
 
+export type GetShoutOutsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetShoutOutsQuery = { __typename?: 'Query', shoutOuts?: Array<{ __typename?: 'ShoutOut', id: string, shoutOut: string, createdAt: any, user: { __typename?: 'User', firstName: string, lastName: string }, receivers: Array<{ __typename?: 'User', firstName: string, lastName: string }> }> | null };
+
+export type GetShoutOutsByCheckInIdQueryVariables = Exact<{
+  checkInID: Scalars['ID'];
+}>;
+
+
+export type GetShoutOutsByCheckInIdQuery = { __typename?: 'Query', shoutOutsByCheckInID?: Array<{ __typename?: 'ShoutOut', id: string, shoutOut: string, createdAt: any, user: { __typename?: 'User', firstName: string, lastName: string }, receivers: Array<{ __typename?: 'User', firstName: string, lastName: string }> }> | null };
+
 export type GetUserQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetUserQuery = { __typename?: 'Query', user: { __typename?: 'User', id: string, firstName: string, lastName: string, email: string, role: Role, reportsTo?: string | null, organization?: { __typename?: 'Organization', id: string, name: string, members: Array<{ __typename?: 'User', id: string, firstName: string, lastName: string, email: string, role: Role, reportsTo?: string | null }> } | null } };
+export type GetUserQuery = { __typename?: 'Query', user: { __typename?: 'User', id: string, firstName: string, lastName: string, email: string, role: Role, reportsTo?: string | null, organization?: { __typename?: 'Organization', id: string, name: string, timezone: string, checkInWeekday: number, members: Array<{ __typename?: 'User', id: string, firstName: string, lastName: string, email: string, role: Role, reportsTo?: string | null }> } | null } };
 
+export const BaseCheckInDataFragmentDoc = gql`
+    fragment BaseCheckInData on CheckIn {
+  id
+  createdAt
+  completedAt
+  reviewedAt
+  expiresAt
+  expired
+  reviewer {
+    id
+    firstName
+    lastName
+  }
+}
+    `;
+export const BaseQuestionDataFragmentDoc = gql`
+    fragment BaseQuestionData on Question {
+  id
+  text
+  questionType
+  responseType
+}
+    `;
 export const BaseUserDataFragmentDoc = gql`
     fragment BaseUserData on User {
   id
@@ -297,6 +477,8 @@ export const OrgWithMembersFragmentDoc = gql`
     fragment OrgWithMembers on Organization {
   id
   name
+  timezone
+  checkInWeekday
   members {
     ...BaseUserData
   }
@@ -339,6 +521,37 @@ export function useCreateOrganizationAndJoinMutation(baseOptions?: Apollo.Mutati
 export type CreateOrganizationAndJoinMutationHookResult = ReturnType<typeof useCreateOrganizationAndJoinMutation>;
 export type CreateOrganizationAndJoinMutationResult = Apollo.MutationResult<CreateOrganizationAndJoinMutation>;
 export type CreateOrganizationAndJoinMutationOptions = Apollo.BaseMutationOptions<CreateOrganizationAndJoinMutation, CreateOrganizationAndJoinMutationVariables>;
+export const CreateShoutOutDocument = gql`
+    mutation CreateShoutOut($input: ShoutOutInput!) {
+  createShoutOut(input: $input)
+}
+    `;
+export type CreateShoutOutMutationFn = Apollo.MutationFunction<CreateShoutOutMutation, CreateShoutOutMutationVariables>;
+
+/**
+ * __useCreateShoutOutMutation__
+ *
+ * To run a mutation, you first call `useCreateShoutOutMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateShoutOutMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createShoutOutMutation, { data, loading, error }] = useCreateShoutOutMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateShoutOutMutation(baseOptions?: Apollo.MutationHookOptions<CreateShoutOutMutation, CreateShoutOutMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateShoutOutMutation, CreateShoutOutMutationVariables>(CreateShoutOutDocument, options);
+      }
+export type CreateShoutOutMutationHookResult = ReturnType<typeof useCreateShoutOutMutation>;
+export type CreateShoutOutMutationResult = Apollo.MutationResult<CreateShoutOutMutation>;
+export type CreateShoutOutMutationOptions = Apollo.BaseMutationOptions<CreateShoutOutMutation, CreateShoutOutMutationVariables>;
 export const DeleteOrganizationDocument = gql`
     mutation DeleteOrganization {
   deleteOrganization
@@ -399,6 +612,37 @@ export function useDeleteUserMutation(baseOptions?: Apollo.MutationHookOptions<D
 export type DeleteUserMutationHookResult = ReturnType<typeof useDeleteUserMutation>;
 export type DeleteUserMutationResult = Apollo.MutationResult<DeleteUserMutation>;
 export type DeleteUserMutationOptions = Apollo.BaseMutationOptions<DeleteUserMutation, DeleteUserMutationVariables>;
+export const JoinOrganizationDocument = gql`
+    mutation JoinOrganization($orgID: ID!) {
+  joinOrganization(organizationID: $orgID)
+}
+    `;
+export type JoinOrganizationMutationFn = Apollo.MutationFunction<JoinOrganizationMutation, JoinOrganizationMutationVariables>;
+
+/**
+ * __useJoinOrganizationMutation__
+ *
+ * To run a mutation, you first call `useJoinOrganizationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useJoinOrganizationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [joinOrganizationMutation, { data, loading, error }] = useJoinOrganizationMutation({
+ *   variables: {
+ *      orgID: // value for 'orgID'
+ *   },
+ * });
+ */
+export function useJoinOrganizationMutation(baseOptions?: Apollo.MutationHookOptions<JoinOrganizationMutation, JoinOrganizationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<JoinOrganizationMutation, JoinOrganizationMutationVariables>(JoinOrganizationDocument, options);
+      }
+export type JoinOrganizationMutationHookResult = ReturnType<typeof useJoinOrganizationMutation>;
+export type JoinOrganizationMutationResult = Apollo.MutationResult<JoinOrganizationMutation>;
+export type JoinOrganizationMutationOptions = Apollo.BaseMutationOptions<JoinOrganizationMutation, JoinOrganizationMutationVariables>;
 export const LeaveOrganizationDocument = gql`
     mutation LeaveOrganization {
   leaveOrganization
@@ -585,42 +829,180 @@ export function useSignUpWithOrgMutation(baseOptions?: Apollo.MutationHookOption
 export type SignUpWithOrgMutationHookResult = ReturnType<typeof useSignUpWithOrgMutation>;
 export type SignUpWithOrgMutationResult = Apollo.MutationResult<SignUpWithOrgMutation>;
 export type SignUpWithOrgMutationOptions = Apollo.BaseMutationOptions<SignUpWithOrgMutation, SignUpWithOrgMutationVariables>;
-export const UpdateUserPermissionsDocument = gql`
-    mutation UpdateUserPermissions($userID: ID!, $input: UpdateUserPermissionsInput!) {
-  updateUserPermissions(userID: $userID, input: $input) {
+export const SubmitCheckInResponsesDocument = gql`
+    mutation SubmitCheckInResponses($input: SubmitCheckInResponsesInput!) {
+  submitCheckInResponses(input: $input) {
     id
-    role
-    reportsTo
+    completedAt
   }
 }
     `;
-export type UpdateUserPermissionsMutationFn = Apollo.MutationFunction<UpdateUserPermissionsMutation, UpdateUserPermissionsMutationVariables>;
+export type SubmitCheckInResponsesMutationFn = Apollo.MutationFunction<SubmitCheckInResponsesMutation, SubmitCheckInResponsesMutationVariables>;
 
 /**
- * __useUpdateUserPermissionsMutation__
+ * __useSubmitCheckInResponsesMutation__
  *
- * To run a mutation, you first call `useUpdateUserPermissionsMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useUpdateUserPermissionsMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useSubmitCheckInResponsesMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSubmitCheckInResponsesMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [updateUserPermissionsMutation, { data, loading, error }] = useUpdateUserPermissionsMutation({
+ * const [submitCheckInResponsesMutation, { data, loading, error }] = useSubmitCheckInResponsesMutation({
  *   variables: {
- *      userID: // value for 'userID'
  *      input: // value for 'input'
  *   },
  * });
  */
-export function useUpdateUserPermissionsMutation(baseOptions?: Apollo.MutationHookOptions<UpdateUserPermissionsMutation, UpdateUserPermissionsMutationVariables>) {
+export function useSubmitCheckInResponsesMutation(baseOptions?: Apollo.MutationHookOptions<SubmitCheckInResponsesMutation, SubmitCheckInResponsesMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<UpdateUserPermissionsMutation, UpdateUserPermissionsMutationVariables>(UpdateUserPermissionsDocument, options);
+        return Apollo.useMutation<SubmitCheckInResponsesMutation, SubmitCheckInResponsesMutationVariables>(SubmitCheckInResponsesDocument, options);
       }
-export type UpdateUserPermissionsMutationHookResult = ReturnType<typeof useUpdateUserPermissionsMutation>;
-export type UpdateUserPermissionsMutationResult = Apollo.MutationResult<UpdateUserPermissionsMutation>;
-export type UpdateUserPermissionsMutationOptions = Apollo.BaseMutationOptions<UpdateUserPermissionsMutation, UpdateUserPermissionsMutationVariables>;
+export type SubmitCheckInResponsesMutationHookResult = ReturnType<typeof useSubmitCheckInResponsesMutation>;
+export type SubmitCheckInResponsesMutationResult = Apollo.MutationResult<SubmitCheckInResponsesMutation>;
+export type SubmitCheckInResponsesMutationOptions = Apollo.BaseMutationOptions<SubmitCheckInResponsesMutation, SubmitCheckInResponsesMutationVariables>;
+export const SubmitCheckInReviewDocument = gql`
+    mutation SubmitCheckInReview($input: SubmitCheckInReviewInput!) {
+  submitCheckInReview(input: $input) {
+    id
+    reviewedAt
+    review
+  }
+}
+    `;
+export type SubmitCheckInReviewMutationFn = Apollo.MutationFunction<SubmitCheckInReviewMutation, SubmitCheckInReviewMutationVariables>;
+
+/**
+ * __useSubmitCheckInReviewMutation__
+ *
+ * To run a mutation, you first call `useSubmitCheckInReviewMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSubmitCheckInReviewMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [submitCheckInReviewMutation, { data, loading, error }] = useSubmitCheckInReviewMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useSubmitCheckInReviewMutation(baseOptions?: Apollo.MutationHookOptions<SubmitCheckInReviewMutation, SubmitCheckInReviewMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SubmitCheckInReviewMutation, SubmitCheckInReviewMutationVariables>(SubmitCheckInReviewDocument, options);
+      }
+export type SubmitCheckInReviewMutationHookResult = ReturnType<typeof useSubmitCheckInReviewMutation>;
+export type SubmitCheckInReviewMutationResult = Apollo.MutationResult<SubmitCheckInReviewMutation>;
+export type SubmitCheckInReviewMutationOptions = Apollo.BaseMutationOptions<SubmitCheckInReviewMutation, SubmitCheckInReviewMutationVariables>;
+export const UpdateOrgSettingsDocument = gql`
+    mutation UpdateOrgSettings($input: OrgSettingsInput!) {
+  updateOrgSettings(input: $input) {
+    id
+    timezone
+    checkInWeekday
+  }
+}
+    `;
+export type UpdateOrgSettingsMutationFn = Apollo.MutationFunction<UpdateOrgSettingsMutation, UpdateOrgSettingsMutationVariables>;
+
+/**
+ * __useUpdateOrgSettingsMutation__
+ *
+ * To run a mutation, you first call `useUpdateOrgSettingsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateOrgSettingsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateOrgSettingsMutation, { data, loading, error }] = useUpdateOrgSettingsMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateOrgSettingsMutation(baseOptions?: Apollo.MutationHookOptions<UpdateOrgSettingsMutation, UpdateOrgSettingsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateOrgSettingsMutation, UpdateOrgSettingsMutationVariables>(UpdateOrgSettingsDocument, options);
+      }
+export type UpdateOrgSettingsMutationHookResult = ReturnType<typeof useUpdateOrgSettingsMutation>;
+export type UpdateOrgSettingsMutationResult = Apollo.MutationResult<UpdateOrgSettingsMutation>;
+export type UpdateOrgSettingsMutationOptions = Apollo.BaseMutationOptions<UpdateOrgSettingsMutation, UpdateOrgSettingsMutationVariables>;
+export const UpdateReportsToDocument = gql`
+    mutation UpdateReportsTo($userID: ID!, $reportsTo: ID) {
+  updateReportsTo(userID: $userID, reportsTo: $reportsTo) {
+    id
+    reportsTo
+  }
+}
+    `;
+export type UpdateReportsToMutationFn = Apollo.MutationFunction<UpdateReportsToMutation, UpdateReportsToMutationVariables>;
+
+/**
+ * __useUpdateReportsToMutation__
+ *
+ * To run a mutation, you first call `useUpdateReportsToMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateReportsToMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateReportsToMutation, { data, loading, error }] = useUpdateReportsToMutation({
+ *   variables: {
+ *      userID: // value for 'userID'
+ *      reportsTo: // value for 'reportsTo'
+ *   },
+ * });
+ */
+export function useUpdateReportsToMutation(baseOptions?: Apollo.MutationHookOptions<UpdateReportsToMutation, UpdateReportsToMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateReportsToMutation, UpdateReportsToMutationVariables>(UpdateReportsToDocument, options);
+      }
+export type UpdateReportsToMutationHookResult = ReturnType<typeof useUpdateReportsToMutation>;
+export type UpdateReportsToMutationResult = Apollo.MutationResult<UpdateReportsToMutation>;
+export type UpdateReportsToMutationOptions = Apollo.BaseMutationOptions<UpdateReportsToMutation, UpdateReportsToMutationVariables>;
+export const UpdateRoleDocument = gql`
+    mutation UpdateRole($userID: ID!, $role: Role!) {
+  updateRole(userID: $userID, role: $role) {
+    id
+    role
+  }
+}
+    `;
+export type UpdateRoleMutationFn = Apollo.MutationFunction<UpdateRoleMutation, UpdateRoleMutationVariables>;
+
+/**
+ * __useUpdateRoleMutation__
+ *
+ * To run a mutation, you first call `useUpdateRoleMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateRoleMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateRoleMutation, { data, loading, error }] = useUpdateRoleMutation({
+ *   variables: {
+ *      userID: // value for 'userID'
+ *      role: // value for 'role'
+ *   },
+ * });
+ */
+export function useUpdateRoleMutation(baseOptions?: Apollo.MutationHookOptions<UpdateRoleMutation, UpdateRoleMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateRoleMutation, UpdateRoleMutationVariables>(UpdateRoleDocument, options);
+      }
+export type UpdateRoleMutationHookResult = ReturnType<typeof useUpdateRoleMutation>;
+export type UpdateRoleMutationResult = Apollo.MutationResult<UpdateRoleMutation>;
+export type UpdateRoleMutationOptions = Apollo.BaseMutationOptions<UpdateRoleMutation, UpdateRoleMutationVariables>;
 export const GetAuthTokenDocument = gql`
     query GetAuthToken {
   authToken
@@ -656,19 +1038,14 @@ export type GetAuthTokenQueryResult = Apollo.QueryResult<GetAuthTokenQuery, GetA
 export const GetCheckInByIdDocument = gql`
     query GetCheckInByID($checkInID: ID!) {
   checkInByID(checkInID: $checkInID) {
-    id
-    createdAt
-    completedAt
-    reviewedAt
+    ...BaseCheckInData
     questions {
-      id
-      text
-      questionType
-      responseType
+      ...BaseQuestionData
     }
   }
 }
-    `;
+    ${BaseCheckInDataFragmentDoc}
+${BaseQuestionDataFragmentDoc}`;
 
 /**
  * __useGetCheckInByIdQuery__
@@ -697,6 +1074,54 @@ export function useGetCheckInByIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOpt
 export type GetCheckInByIdQueryHookResult = ReturnType<typeof useGetCheckInByIdQuery>;
 export type GetCheckInByIdLazyQueryHookResult = ReturnType<typeof useGetCheckInByIdLazyQuery>;
 export type GetCheckInByIdQueryResult = Apollo.QueryResult<GetCheckInByIdQuery, GetCheckInByIdQueryVariables>;
+export const GetCheckInByIdWithResponsesDocument = gql`
+    query GetCheckInByIDWithResponses($checkInID: ID!) {
+  checkInByID(checkInID: $checkInID) {
+    ...BaseCheckInData
+    user {
+      id
+    }
+    review
+    questions {
+      ...BaseQuestionData
+      responses {
+        __typename
+        id
+        response
+      }
+    }
+  }
+}
+    ${BaseCheckInDataFragmentDoc}
+${BaseQuestionDataFragmentDoc}`;
+
+/**
+ * __useGetCheckInByIdWithResponsesQuery__
+ *
+ * To run a query within a React component, call `useGetCheckInByIdWithResponsesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetCheckInByIdWithResponsesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetCheckInByIdWithResponsesQuery({
+ *   variables: {
+ *      checkInID: // value for 'checkInID'
+ *   },
+ * });
+ */
+export function useGetCheckInByIdWithResponsesQuery(baseOptions: Apollo.QueryHookOptions<GetCheckInByIdWithResponsesQuery, GetCheckInByIdWithResponsesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetCheckInByIdWithResponsesQuery, GetCheckInByIdWithResponsesQueryVariables>(GetCheckInByIdWithResponsesDocument, options);
+      }
+export function useGetCheckInByIdWithResponsesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetCheckInByIdWithResponsesQuery, GetCheckInByIdWithResponsesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetCheckInByIdWithResponsesQuery, GetCheckInByIdWithResponsesQueryVariables>(GetCheckInByIdWithResponsesDocument, options);
+        }
+export type GetCheckInByIdWithResponsesQueryHookResult = ReturnType<typeof useGetCheckInByIdWithResponsesQuery>;
+export type GetCheckInByIdWithResponsesLazyQueryHookResult = ReturnType<typeof useGetCheckInByIdWithResponsesLazyQuery>;
+export type GetCheckInByIdWithResponsesQueryResult = Apollo.QueryResult<GetCheckInByIdWithResponsesQuery, GetCheckInByIdWithResponsesQueryVariables>;
 export const GetCheckInsDocument = gql`
     query GetCheckIns {
   checkIns {
@@ -704,10 +1129,8 @@ export const GetCheckInsDocument = gql`
     createdAt
     completedAt
     reviewedAt
-    user {
-      firstName
-      lastName
-    }
+    expiresAt
+    expired
   }
 }
     `;
@@ -738,6 +1161,49 @@ export function useGetCheckInsLazyQuery(baseOptions?: Apollo.LazyQueryHookOption
 export type GetCheckInsQueryHookResult = ReturnType<typeof useGetCheckInsQuery>;
 export type GetCheckInsLazyQueryHookResult = ReturnType<typeof useGetCheckInsLazyQuery>;
 export type GetCheckInsQueryResult = Apollo.QueryResult<GetCheckInsQuery, GetCheckInsQueryVariables>;
+export const GetCheckInsByReviewerDocument = gql`
+    query GetCheckInsByReviewer {
+  checkInsByReviewer {
+    id
+    createdAt
+    completedAt
+    reviewedAt
+    expiresAt
+    expired
+    user {
+      firstName
+      lastName
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetCheckInsByReviewerQuery__
+ *
+ * To run a query within a React component, call `useGetCheckInsByReviewerQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetCheckInsByReviewerQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetCheckInsByReviewerQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetCheckInsByReviewerQuery(baseOptions?: Apollo.QueryHookOptions<GetCheckInsByReviewerQuery, GetCheckInsByReviewerQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetCheckInsByReviewerQuery, GetCheckInsByReviewerQueryVariables>(GetCheckInsByReviewerDocument, options);
+      }
+export function useGetCheckInsByReviewerLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetCheckInsByReviewerQuery, GetCheckInsByReviewerQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetCheckInsByReviewerQuery, GetCheckInsByReviewerQueryVariables>(GetCheckInsByReviewerDocument, options);
+        }
+export type GetCheckInsByReviewerQueryHookResult = ReturnType<typeof useGetCheckInsByReviewerQuery>;
+export type GetCheckInsByReviewerLazyQueryHookResult = ReturnType<typeof useGetCheckInsByReviewerLazyQuery>;
+export type GetCheckInsByReviewerQueryResult = Apollo.QueryResult<GetCheckInsByReviewerQuery, GetCheckInsByReviewerQueryVariables>;
 export const GetOrganizationAndMembersDocument = gql`
     query GetOrganizationAndMembers {
   organization {
@@ -808,6 +1274,95 @@ export function useGetOrganizationInfoLazyQuery(baseOptions?: Apollo.LazyQueryHo
 export type GetOrganizationInfoQueryHookResult = ReturnType<typeof useGetOrganizationInfoQuery>;
 export type GetOrganizationInfoLazyQueryHookResult = ReturnType<typeof useGetOrganizationInfoLazyQuery>;
 export type GetOrganizationInfoQueryResult = Apollo.QueryResult<GetOrganizationInfoQuery, GetOrganizationInfoQueryVariables>;
+export const GetShoutOutsDocument = gql`
+    query GetShoutOuts {
+  shoutOuts {
+    id
+    user {
+      firstName
+      lastName
+    }
+    receivers {
+      firstName
+      lastName
+    }
+    shoutOut
+    createdAt
+  }
+}
+    `;
+
+/**
+ * __useGetShoutOutsQuery__
+ *
+ * To run a query within a React component, call `useGetShoutOutsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetShoutOutsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetShoutOutsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetShoutOutsQuery(baseOptions?: Apollo.QueryHookOptions<GetShoutOutsQuery, GetShoutOutsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetShoutOutsQuery, GetShoutOutsQueryVariables>(GetShoutOutsDocument, options);
+      }
+export function useGetShoutOutsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetShoutOutsQuery, GetShoutOutsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetShoutOutsQuery, GetShoutOutsQueryVariables>(GetShoutOutsDocument, options);
+        }
+export type GetShoutOutsQueryHookResult = ReturnType<typeof useGetShoutOutsQuery>;
+export type GetShoutOutsLazyQueryHookResult = ReturnType<typeof useGetShoutOutsLazyQuery>;
+export type GetShoutOutsQueryResult = Apollo.QueryResult<GetShoutOutsQuery, GetShoutOutsQueryVariables>;
+export const GetShoutOutsByCheckInIdDocument = gql`
+    query GetShoutOutsByCheckInID($checkInID: ID!) {
+  shoutOutsByCheckInID(checkInID: $checkInID) {
+    id
+    user {
+      firstName
+      lastName
+    }
+    receivers {
+      firstName
+      lastName
+    }
+    shoutOut
+    createdAt
+  }
+}
+    `;
+
+/**
+ * __useGetShoutOutsByCheckInIdQuery__
+ *
+ * To run a query within a React component, call `useGetShoutOutsByCheckInIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetShoutOutsByCheckInIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetShoutOutsByCheckInIdQuery({
+ *   variables: {
+ *      checkInID: // value for 'checkInID'
+ *   },
+ * });
+ */
+export function useGetShoutOutsByCheckInIdQuery(baseOptions: Apollo.QueryHookOptions<GetShoutOutsByCheckInIdQuery, GetShoutOutsByCheckInIdQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetShoutOutsByCheckInIdQuery, GetShoutOutsByCheckInIdQueryVariables>(GetShoutOutsByCheckInIdDocument, options);
+      }
+export function useGetShoutOutsByCheckInIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetShoutOutsByCheckInIdQuery, GetShoutOutsByCheckInIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetShoutOutsByCheckInIdQuery, GetShoutOutsByCheckInIdQueryVariables>(GetShoutOutsByCheckInIdDocument, options);
+        }
+export type GetShoutOutsByCheckInIdQueryHookResult = ReturnType<typeof useGetShoutOutsByCheckInIdQuery>;
+export type GetShoutOutsByCheckInIdLazyQueryHookResult = ReturnType<typeof useGetShoutOutsByCheckInIdLazyQuery>;
+export type GetShoutOutsByCheckInIdQueryResult = Apollo.QueryResult<GetShoutOutsByCheckInIdQuery, GetShoutOutsByCheckInIdQueryVariables>;
 export const GetUserDocument = gql`
     query GetUser {
   user {

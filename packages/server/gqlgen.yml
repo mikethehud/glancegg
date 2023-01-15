@@ -29,9 +29,15 @@ models:
     fields:
       user:
         resolver: true
+      reviewer:
+        resolver: true
       questions:
         resolver: true
   User:
     fields:
       organization:
+        resolver: true
+  Question:
+    fields:
+      responses:
         resolver: true

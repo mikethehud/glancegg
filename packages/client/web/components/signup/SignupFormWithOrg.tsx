@@ -8,6 +8,7 @@ import { useSignUpWithOrgMutation } from "../../lib/graphql/generated/generated"
 import { FormError } from "../formError/FormError";
 import { Card } from "../card/Card";
 import { Section } from "../container/Section";
+import { getErrorMessage, validateEmail, validatePasswordsEqual } from "./utils";
 
 type Inputs = {
     email: string,
@@ -40,21 +41,6 @@ export const SignupFormWithOrg = ({ organizationID, onSuccess }: SignupProps) =>
         })
     }
 
-    const getErrorMessage = (code: string): string => {
-        switch (code) {
-            case "USER_NOT_UNIQUE":
-                return "A user with this email already exists."
-            case "VALIDATION_ERROR":
-                return "Some of those fields don't look right. Please try again."
-            default:
-                return "Unknown error."
-        }
-    }
-
-    const validatePasswordsEqual = (val: string): boolean => {
-        return watch('password') === val
-    }
-
     if (data) {
         onSuccess()
     }
@@ -70,14 +56,14 @@ export const SignupFormWithOrg = ({ organizationID, onSuccess }: SignupProps) =>
                         <TextInput
                             placeholder="Enter First Name"
                             error={errors.firstName && errors.firstName.message}
-                            {...register("firstName", { required: true })}
+                            {...register("firstName", { required: "This field is required." })}
                         />
                     </FormElement>
                     <FormElement label="Last Name">
                         <TextInput
                             placeholder="Enter Last Name"
                             error={errors.lastName && errors.lastName.message}
-                            {...register("lastName", { required: true })}
+                            {...register("lastName", { required: "This field is required." })}
                         />
                     </FormElement>
                 </Section>
@@ -87,7 +73,10 @@ export const SignupFormWithOrg = ({ organizationID, onSuccess }: SignupProps) =>
                             type="email"
                             placeholder="Enter Email"
                             error={errors.email && errors.email.message}
-                            {...register("email", { required: true })}
+                            {...register("email", {
+                                required: "This field is required.",
+                                validate: validateEmail
+                            })}
                         />
                     </FormElement>
                 </Section>
@@ -97,7 +86,13 @@ export const SignupFormWithOrg = ({ organizationID, onSuccess }: SignupProps) =>
                             type="password"
                             placeholder="Enter Password"
                             error={errors.password && errors.password.message}
-                            {...register("password", { required: true, minLength: 8 })}
+                            {...register("password", {
+                                required: "This field is required.",
+                                minLength: {
+                                    value: 8,
+                                    message: "Passwords must be at least 8 characters long."
+                                }
+                            })}
                         />
                     </FormElement>
                     <FormElement label="Confirm Password">
@@ -105,7 +100,10 @@ export const SignupFormWithOrg = ({ organizationID, onSuccess }: SignupProps) =>
                             type="password"
                             placeholder="Confirm Password"
                             error={errors.passwordConfirm && errors.passwordConfirm.message}
-                            {...register("passwordConfirm", { required: true, minLength: 8, validate: validatePasswordsEqual })}
+                            {...register("passwordConfirm", {
+                                required: "This field is required.",
+                                validate: val => validatePasswordsEqual(watch('password'), val)
+                            })}
                         />
                     </FormElement>
                 </Section>

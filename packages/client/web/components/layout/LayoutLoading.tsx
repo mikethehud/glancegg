@@ -5,9 +5,17 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faInstagram, faTwitter, faDiscord, faYoutube } from '@fortawesome/free-brands-svg-icons'
 import { PageSpinner } from "../spinner/Spinner";
 import { Footer } from "./Footer";
+import Head from "next/head";
 
-export const LayoutLoading = () => (
+interface LayoutLoadingProps {
+    title: string
+}
+
+export const LayoutLoading = ({ title }: LayoutLoadingProps) => (
     <div className={styles.layout}>
+        <Head>
+            <title>{title}</title>
+        </Head>
         <NavigationBasic />
         <main>
             <PageSpinner />

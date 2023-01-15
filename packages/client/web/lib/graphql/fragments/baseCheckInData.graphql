@@ -1,0 +1,13 @@
+fragment BaseCheckInData on CheckIn {
+    id
+    createdAt
+    completedAt
+    reviewedAt
+    expiresAt
+    expired
+    reviewer {
+        id
+        firstName
+        lastName
+    }
+}

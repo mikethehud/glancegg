@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"github.com/golang-jwt/jwt"
 	"github.com/mikethehud/glancegg/packages/server/types"
 	"github.com/pkg/errors"
@@ -130,7 +129,6 @@ func validateExpiry(expiryClaim interface{}, duration time.Duration) error {
 	// parse expiry
 	expTime, err := getExpiryFromClaim(expiryClaim)
 	if err != nil {
-		fmt.Println(expiryClaim)
 		return errors.New("could not cast jwt expiry as float64")
 	}
 

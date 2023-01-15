@@ -13,9 +13,13 @@ type CheckIn struct {
 	ID          string      `json:"id"`
 	Questions   []*Question `json:"questions"`
 	User        *User       `json:"user"`
+	Reviewer    *User       `json:"reviewer"`
 	CreatedAt   time.Time   `json:"createdAt"`
 	CompletedAt *time.Time  `json:"completedAt"`
 	ReviewedAt  *time.Time  `json:"reviewedAt"`
+	Review      *string     `json:"review"`
+	ExpiresAt   time.Time   `json:"expiresAt"`
+	Expired     bool        `json:"expired"`
 }
 
 type CreateCheckInInput struct {
@@ -23,7 +27,8 @@ type CreateCheckInInput struct {
 }
 
 type CreateOrganizationAndJoinInput struct {
-	Name string `json:"name"`
+	Name     string `json:"name"`
+	Timezone string `json:"timezone"`
 }
 
 type LogInInput struct {
@@ -31,10 +36,17 @@ type LogInInput struct {
 	Password string `json:"password"`
 }
 
+type OrgSettingsInput struct {
+	Timezone       string `json:"timezone"`
+	CheckInWeekday int    `json:"checkInWeekday"`
+}
+
 type Organization struct {
-	ID      string  `json:"id"`
-	Name    string  `json:"name"`
-	Members []*User `json:"members"`
+	ID             string  `json:"id"`
+	Name           string  `json:"name"`
+	Members        []*User `json:"members"`
+	Timezone       string  `json:"timezone"`
+	CheckInWeekday int     `json:"checkInWeekday"`
 }
 
 type OrganizationInfo struct {
@@ -48,6 +60,33 @@ type Question struct {
 	QuestionType string       `json:"questionType"`
 	Text         string       `json:"text"`
 	ResponseType ResponseType `json:"responseType"`
+	Responses    []*Response  `json:"responses"`
+}
+
+type Response struct {
+	ID       string `json:"id"`
+	Position int    `json:"position"`
+	Response string `json:"response"`
+}
+
+type ResponseInput struct {
+	QuestionID string `json:"questionID"`
+	Position   int    `json:"position"`
+	Response   string `json:"response"`
+}
+
+type ShoutOut struct {
+	ID        string    `json:"id"`
+	ShoutOut  string    `json:"shoutOut"`
+	User      *User     `json:"user"`
+	Receivers []*User   `json:"receivers"`
+	CreatedAt time.Time `json:"createdAt"`
+}
+
+type ShoutOutInput struct {
+	ShoutOut    string   `json:"shoutOut"`
+	CheckInID   *string  `json:"checkInID"`
+	ReceiverIDs []string `json:"receiverIDs"`
 }
 
 type SignUpWithOrgInput struct {
@@ -59,21 +98,22 @@ type SignUpWithOrgInput struct {
 }
 
 type SignUpWithoutOrgInput struct {
-	OrganizationName string `json:"organizationName"`
-	FirstName        string `json:"firstName"`
-	LastName         string `json:"lastName"`
-	Email            string `json:"email"`
-	Password         string `json:"password"`
+	OrganizationName     string `json:"organizationName"`
+	OrganizationTimezone string `json:"organizationTimezone"`
+	FirstName            string `json:"firstName"`
+	LastName             string `json:"lastName"`
+	Email                string `json:"email"`
+	Password             string `json:"password"`
 }
 
-type Team struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+type SubmitCheckInResponsesInput struct {
+	CheckInID string           `json:"checkInID"`
+	Responses []*ResponseInput `json:"responses"`
 }
 
-type UpdateUserPermissionsInput struct {
-	ReportsTo *string `json:"reportsTo"`
-	Role      *string `json:"role"`
+type SubmitCheckInReviewInput struct {
+	CheckInID string `json:"checkInID"`
+	Review    string `json:"review"`
 }
 
 type User struct {

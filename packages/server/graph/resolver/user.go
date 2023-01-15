@@ -58,17 +58,24 @@ func (r *queryResolver) GetUsersReportingTo(ctx context.Context) ([]*model.User,
 	return modelUsers, nil
 }
 
-func (r *mutationResolver) UpdateUserPermissions(ctx context.Context, userID string, input model.UpdateUserPermissionsInput) (*model.User, error) {
+func (r *mutationResolver) UpdateRole(ctx context.Context, userID string, role model.Role) (*model.User, error) {
 	if !utils.IsAuthenticated(ctx) || !utils.IsAdmin(ctx) {
 		return nil, errors.New(utils.ErrorNoAccess)
 	}
 
-	role, err := types.RoleFromString(*input.Role)
+	user, err := r.Service.UpdateRole(ctx, userID, utils.ContextOrgID(ctx), types.RoleFromModelRole(role))
 	if err != nil {
-		return nil, errors.New(utils.ErrorInvalidInput)
+		return nil, err
+	}
+	return user.ToModel(), nil
+}
+
+func (r *mutationResolver) UpdateReportsTo(ctx context.Context, userID string, reportsTo *string) (*model.User, error) {
+	if !utils.IsAuthenticated(ctx) || !utils.IsAdmin(ctx) {
+		return nil, errors.New(utils.ErrorNoAccess)
 	}
 
-	user, err := r.Service.UpdateUserPermissions(ctx, userID, utils.ContextOrgID(ctx), role, input.ReportsTo)
+	user, err := r.Service.UpdateReportsTo(ctx, userID, utils.ContextOrgID(ctx), reportsTo)
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +109,7 @@ func (r *mutationResolver) LeaveOrganization(ctx context.Context) (*bool, error)
 }
 
 func (r *mutationResolver) CreateOrganizationAndJoin(ctx context.Context, input model.CreateOrganizationAndJoinInput) (*model.User, error) {
-	user, err := r.Service.CreateAndJoinOrganization(ctx, input.Name)
+	user, err := r.Service.CreateAndJoinOrganization(ctx, input.Name, input.Timezone)
 	if err != nil {
 		return nil, err
 	}
@@ -111,4 +118,16 @@ func (r *mutationResolver) CreateOrganizationAndJoin(ctx context.Context, input 
 
 func (r *mutationResolver) DeleteUser(ctx context.Context) (*bool, error) {
 	return nil, r.Service.DeleteUser(ctx)
+}
+
+func (r *mutationResolver) JoinOrganization(ctx context.Context, orgID string) (string, error) {
+	if !utils.IsAuthenticated(ctx) {
+		return "", errors.New(utils.ErrorNoAccess)
+	}
+
+	u, err := r.Service.JoinOrganization(ctx, utils.ContextUserID(ctx), orgID)
+	if err != nil {
+		return "", err
+	}
+	return returnTokens(ctx, r.Service.Logger, u)
 }

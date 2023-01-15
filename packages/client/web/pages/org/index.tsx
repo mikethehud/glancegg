@@ -1,25 +1,26 @@
 import { NextPage } from "next"
 import styles from "./Org.module.css"
 import { Layout } from "../../components/layout/Layout"
-import { Role, useDeleteOrganizationMutation, useGetUserQuery, useLeaveOrganizationMutation, User } from "../../lib/graphql/generated/generated"
+import { Role, useDeleteOrganizationMutation, useGetUserQuery, useLeaveOrganizationMutation, User, useUpdateReportsToMutation } from "../../lib/graphql/generated/generated"
 import { Button } from "../../components/button/Button"
 import { FormError } from "../../components/formError/FormError"
 import { Member } from "./Member"
 import { useEffect, useState } from "react"
-import { TextInput } from "../../components/textInput/TextInput"
 import { useToast } from "../../lib/context/toastContext"
 import { Section } from "../../components/container/Section"
 import { Container } from "../../components/container/Container"
-import { LayoutLoading } from "../../components/layout/LayoutLoading"
 import { Redirect } from "../../components/redirect/Redirect"
 import { RoleRestricted } from "../../components/role/Role"
 import { removeToken } from "../../lib/jwt/jwt"
 import { ConfirmDialog } from "../../components/dialog/Dialog"
-import { useRouter } from "next/router"
+import { Invite } from "../../components/invite/Invite"
+import { OrgSettings } from "./OrgSettings"
+import { countAdmins } from "../../lib/util/organization"
 
 const Org: NextPage = () => {
+    const title = "Settings"
     const [deleteOrgDialog, setDeleteOrgDialog] = useState(false)
-    const [leaveOrgDialog, setLeaveOrgDialog] = useState(false)
+
     const { showSuccessToast } = useToast()
     const { data, error, loading } = useGetUserQuery()
     const [deleteOrganization, deleteOrganizationResult] = useDeleteOrganizationMutation({
@@ -29,35 +30,12 @@ const Org: NextPage = () => {
             removeToken()
         }
     })
-    const [leaveOrg, leaveOrgResult] = useLeaveOrganizationMutation({
-        refetchQueries: ['GetUser'],
-        onCompleted: () => {
-            showSuccessToast("Left Organization.")
-            removeToken()
-        }
-    })
-    const [adminCount, setAdminCount] = useState(0)
 
-    const handleInviteCopy = () => {
-        navigator.clipboard.writeText(inviteURL)
-        showSuccessToast("Invite link copied to clipboard")
-    }
-
-    useEffect(() => {
-        if (data && data.user.organization) {
-            setAdminCount(data.user.organization.members.reduce<number>(
-                (acc, val) => val.role == Role.Admin ? acc + 1 : acc,
-                0
-            ))
-        }
-    }, [data, setAdminCount])
-
-    if (loading || !data) return <LayoutLoading />
+    if (loading || !data) return <Layout title={title} loading />
     if (!data.user.organization) return <Redirect to="/org/create" />
-    if (error) return <Layout><FormError error={error.message}/></Layout>
+    if (error) return <Layout title={title}><FormError error={error.message}/></Layout>
 
     const organization = data.user.organization
-    const inviteURL = "http://localhost:3000/invite/" + organization.id
 
     const getErrorMessage = (code: string): string => {
         switch (code) {
@@ -81,36 +59,23 @@ const Org: NextPage = () => {
         />
     )
 
-    const ConfirmLeave = () => (
-        <ConfirmDialog
-            title="Leave Organization"
-            content="By leaving this organization, you will lose access to your data associated with this organization, including check-ins."
-            okButtonText="Yes, Leave Organization"
-            okButtonHandler={() => {
-                leaveOrg()
-                setLeaveOrgDialog(false)
-            }}
-            onClose={() => setLeaveOrgDialog(false)}
-        />
-    )
+    const adminCount = countAdmins(organization.members)
 
     return (
         <>
-            <Layout>
+            <Layout title={title}>
                 <Container>
                     <Section className={styles.header}>
                         <h1>{organization.name}</h1>
-                        <div>
-                            <Button
-                                primary
-                                variant="caution"
-                                xsmall
-                                onClick={() => setLeaveOrgDialog(true)}
-                                disabled={data.user.role === Role.Admin && adminCount === 1}
-                            >
-                                Leave Organization
-                            </Button>
-                        </div>
+                    </Section>
+                    <Section>
+                        <h2>Options</h2>
+                    </Section>
+                    <Section>
+                        <OrgSettings organization={organization} />
+                    </Section>
+                    <Section>
+                        <h2>Members</h2>
                     </Section>
                     <Section className={styles.members}>
                         {organization.members.map(user => (
@@ -121,24 +86,13 @@ const Org: NextPage = () => {
                             />
                         ))}
                     </Section>
-                    {leaveOrgResult.error && (
-                        <FormError
-                            error={getErrorMessage(leaveOrgResult.error.message)}
-                        />
-                    )}
                     {deleteOrganizationResult.error && (
                         <FormError
                             error={getErrorMessage(deleteOrganizationResult.error.message)}
                         />
                     )}
                     <RoleRestricted allowed={[Role.Admin]}>
-                        <Section>
-                            <h4>Invite team members</h4>
-                            <Section className={styles.inviteButtons}>
-                                <TextInput block disabled value={inviteURL} />
-                                <Button primary small onClick={() => handleInviteCopy()}>Copy Link</Button>
-                            </Section>
-                        </Section>
+                        <Invite orgID={data.user.organization.id} />
                         <Section>
                             <Button onClick={() => setDeleteOrgDialog(true)} primary variant="caution" small>
                                 Delete Organization
@@ -148,7 +102,6 @@ const Org: NextPage = () => {
                 </Container>
             </Layout>
             {deleteOrgDialog && <ConfirmDeleteOrg />}
-            {leaveOrgDialog && <ConfirmLeave />}
         </>
     )
 }

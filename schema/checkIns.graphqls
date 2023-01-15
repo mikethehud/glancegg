@@ -8,9 +8,13 @@ type CheckIn {
     id: ID!
     questions: [Question!]!
     user: User!
+    reviewer: User!
     createdAt: Time!
     completedAt: Time
     reviewedAt: Time
+    review: String
+    expiresAt: Time!
+    expired: Boolean!
 }
 
 type Question {
@@ -20,36 +24,43 @@ type Question {
     questionType: String!
     text: String!
     responseType: ResponseType!
-    # responses: [Response!]
+    responses: [Response!]
 }
 
-# type Response {
-#     id: ID!
-#     position: Int!
-#     question: Question!
-# }
-
-# type ScaleResponse implements Response {
-#     id: ID!
-#     position: Int!
-#     question: Question!
-#     response: Int!
-# }
-
-# # extend type Query {
-# #     checkIns: [CheckIn!]
-# #     # checkInByID(checkInID: ID!): CheckIn!
-# # }
+type Response {
+    id: ID!
+    position: Int!
+    response: String!
+}
 
 input CreateCheckInInput {
     userID: ID!
 }
 
+input ResponseInput {
+    questionID: ID!
+    position: Int!
+    response: String!
+}
+
+input SubmitCheckInResponsesInput {
+    checkInID: ID!
+    responses: [ResponseInput!]!
+}
+
+input SubmitCheckInReviewInput {
+    checkInID: ID!
+    review: String!
+}
+
 extend type Mutation {
     createCheckIn(input: CreateCheckInInput!): String!
+    submitCheckInResponses(input: SubmitCheckInResponsesInput!): CheckIn!
+    submitCheckInReview(input: SubmitCheckInReviewInput!): CheckIn!
 }
 
 extend type Query {
     checkIns: [CheckIn!]
+    checkInsByReviewer: [CheckIn!]
     checkInByID(checkInID: ID!): CheckIn!
 }

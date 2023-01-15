@@ -85,16 +85,10 @@
     height: calc(100% - var(--space-xs));
     bottom: 0;
     border-radius: var(--border-radius);
-    background-color: var(--color-gray);
+    background-color: var(--color-lowlight);
     display: flex;
     justify-content: center;
     align-items: center;
-}
-
-.inviteButtons {
-    display: grid;
-    grid-template-columns: auto 150px;
-    gap: var(--space-s);
 }
 
 .confirmButtons {
@@ -107,5 +101,15 @@
     padding: var(--space-xs);
     border-bottom-right-radius: var(--border-radius);
     border-bottom-left-radius: var(--border-radius);
-    background-color: var(--color-gray);
+    background-color: var(--color-lowlight);
+}
+
+.orgSettings {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+}
+
+.orgSettings select {
+    width: 100%;
 }

@@ -12,30 +12,11 @@ import (
 func TestCreateCheckIn(t *testing.T) {
 	ctx := context.TODO()
 	db := test.CreateTestDB(t)
-	org := createTestOrg(t, ctx, db, types.Organization{
-		Name: "Test Org",
-	})
-	reviewer := createTestUser(t, context.TODO(), db, types.User{
-		FirstName:      "Mike",
-		LastName:       "Hudson",
-		Email:          "reporter@hudson.nz",
-		OrganizationID: &org.ID,
-		ReportsTo:      nil,
-		Password:       "this is my password",
-		Role:           types.AdminRole,
-	})
-	user := createTestUser(t, context.TODO(), db, types.User{
-		FirstName:      "Mike",
-		LastName:       "Hudson",
-		Email:          "test@hudson.nz",
-		OrganizationID: &org.ID,
-		ReportsTo:      &reviewer.ID,
-		Password:       "this is my password",
-		Role:           types.UserRole,
-	})
+	_, reviewer, user := createBaseTestValues(t, ctx, db)
 	_, err := CreateCheckIn(ctx, db, types.CheckIn{
 		OrganizationID: *user.OrganizationID,
 		UserID:         user.ID,
+		ReviewerUserID: reviewer.ID,
 	})
 	require.NoError(t, err)
 }
@@ -43,30 +24,11 @@ func TestCreateCheckIn(t *testing.T) {
 func TestGetCheckInsByUserID(t *testing.T) {
 	ctx := context.TODO()
 	db := test.CreateTestDB(t)
-	org := createTestOrg(t, ctx, db, types.Organization{
-		Name: "Test Org",
-	})
-	reviewer := createTestUser(t, context.TODO(), db, types.User{
-		FirstName:      "Mike",
-		LastName:       "Hudson",
-		Email:          "reporter@hudson.nz",
-		OrganizationID: &org.ID,
-		ReportsTo:      nil,
-		Password:       "this is my password",
-		Role:           types.AdminRole,
-	})
-	user := createTestUser(t, context.TODO(), db, types.User{
-		FirstName:      "Mike",
-		LastName:       "Hudson",
-		Email:          "test@hudson.nz",
-		OrganizationID: &org.ID,
-		ReportsTo:      &reviewer.ID,
-		Password:       "this is my password",
-		Role:           types.UserRole,
-	})
+	org, reviewer, user := createBaseTestValues(t, ctx, db)
 	_, err := CreateCheckIn(ctx, db, types.CheckIn{
 		OrganizationID: *user.OrganizationID,
 		UserID:         user.ID,
+		ReviewerUserID: reviewer.ID,
 	})
 	require.NoError(t, err)
 	checkIns, err := GetCheckInsByUserID(ctx, db, user.ID)
@@ -79,21 +41,11 @@ func TestGetCheckInsByUserID(t *testing.T) {
 func TestCreateQuestion(t *testing.T) {
 	ctx := context.TODO()
 	db := test.CreateTestDB(t)
-	org := createTestOrg(t, ctx, db, types.Organization{
-		Name: "Test Org",
-	})
-	user := createTestUser(t, context.TODO(), db, types.User{
-		FirstName:      "Mike",
-		LastName:       "Hudson",
-		Email:          "test@hudson.nz",
-		OrganizationID: &org.ID,
-		ReportsTo:      nil,
-		Password:       "this is my password",
-		Role:           types.UserRole,
-	})
+	_, reviewer, user := createBaseTestValues(t, ctx, db)
 	checkInID, err := CreateCheckIn(ctx, db, types.CheckIn{
 		OrganizationID: *user.OrganizationID,
 		UserID:         user.ID,
+		ReviewerUserID: reviewer.ID,
 	})
 	require.NoError(t, err)
 	q1ID, err := CreateQuestion(ctx, db, types.GQTPulse(), checkInID, 1)
@@ -113,21 +65,11 @@ func TestCreateQuestion(t *testing.T) {
 func TestGetCheckInQuestions(t *testing.T) {
 	ctx := context.TODO()
 	db := test.CreateTestDB(t)
-	org := createTestOrg(t, ctx, db, types.Organization{
-		Name: "Test Org",
-	})
-	user := createTestUser(t, context.TODO(), db, types.User{
-		FirstName:      "Mike",
-		LastName:       "Hudson",
-		Email:          "test@hudson.nz",
-		OrganizationID: &org.ID,
-		ReportsTo:      nil,
-		Password:       "this is my password",
-		Role:           types.UserRole,
-	})
+	_, reviewer, user := createBaseTestValues(t, ctx, db)
 	checkInID, err := CreateCheckIn(ctx, db, types.CheckIn{
 		OrganizationID: *user.OrganizationID,
 		UserID:         user.ID,
+		ReviewerUserID: reviewer.ID,
 	})
 	require.NoError(t, err)
 	pulse := types.GQTPulse()
@@ -154,21 +96,11 @@ func TestGetCheckInQuestions(t *testing.T) {
 func TestCreateResponse(t *testing.T) {
 	ctx := context.TODO()
 	db := test.CreateTestDB(t)
-	org := createTestOrg(t, ctx, db, types.Organization{
-		Name: "Test Org",
-	})
-	user := createTestUser(t, context.TODO(), db, types.User{
-		FirstName:      "Mike",
-		LastName:       "Hudson",
-		Email:          "test@hudson.nz",
-		OrganizationID: &org.ID,
-		ReportsTo:      nil,
-		Password:       "this is my password",
-		Role:           types.UserRole,
-	})
+	_, reviewer, user := createBaseTestValues(t, ctx, db)
 	checkInID, err := CreateCheckIn(ctx, db, types.CheckIn{
 		OrganizationID: *user.OrganizationID,
 		UserID:         user.ID,
+		ReviewerUserID: reviewer.ID,
 	})
 	require.NoError(t, err)
 	qID, err := CreateQuestion(ctx, db, types.GQTPulse(), checkInID, 1)
@@ -185,21 +117,11 @@ func TestCreateResponse(t *testing.T) {
 func TestGetQuestionResponses(t *testing.T) {
 	ctx := context.TODO()
 	db := test.CreateTestDB(t)
-	org := createTestOrg(t, ctx, db, types.Organization{
-		Name: "Test Org",
-	})
-	user := createTestUser(t, context.TODO(), db, types.User{
-		FirstName:      "Mike",
-		LastName:       "Hudson",
-		Email:          "test@hudson.nz",
-		OrganizationID: &org.ID,
-		ReportsTo:      nil,
-		Password:       "this is my password",
-		Role:           types.UserRole,
-	})
+	_, reviewer, user := createBaseTestValues(t, ctx, db)
 	checkInID, err := CreateCheckIn(ctx, db, types.CheckIn{
 		OrganizationID: *user.OrganizationID,
 		UserID:         user.ID,
+		ReviewerUserID: reviewer.ID,
 	})
 	require.NoError(t, err)
 	qID, err := CreateQuestion(ctx, db, types.GQTPriorities(), checkInID, 1)
@@ -219,4 +141,22 @@ func TestGetQuestionResponses(t *testing.T) {
 	responses, err := GetQuestionResponses(ctx, db, qID)
 	require.NoError(t, err)
 	assert.Len(t, responses, 2)
+}
+
+func TestSetCheckInCompleted(t *testing.T) {
+	ctx := context.TODO()
+	db := test.CreateTestDB(t)
+	_, reviewer, user := createBaseTestValues(t, ctx, db)
+	checkInID, err := CreateCheckIn(ctx, db, types.CheckIn{
+		OrganizationID: *user.OrganizationID,
+		UserID:         user.ID,
+		ReviewerUserID: reviewer.ID,
+	})
+	require.NoError(t, err)
+	checkIn, err := GetCheckInByID(ctx, db, checkInID)
+	require.NoError(t, err)
+	assert.Nil(t, checkIn.CompletedAt)
+	completedCheckIn, err := SetCheckInCompleted(ctx, db, checkInID)
+	require.NoError(t, err)
+	assert.NotNil(t, completedCheckIn.CompletedAt)
 }

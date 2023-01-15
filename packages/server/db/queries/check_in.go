@@ -5,12 +5,13 @@ import (
 	"github.com/google/uuid"
 	"github.com/mikethehud/glancegg/packages/server/types"
 	"github.com/pkg/errors"
+	"time"
 )
 
 func CreateCheckIn(ctx context.Context, q QueryRunner, checkIn types.CheckIn) (string, error) {
 	query := `
-		INSERT INTO check_ins (id, organization_id, user_id, reviewer_user_id)
-		VALUES (:id, :organization_id, :user_id, :reviewer_user_id)
+		INSERT INTO check_ins (id, organization_id, user_id, reviewer_user_id, expires_at)
+		VALUES (:id, :organization_id, :user_id, :reviewer_user_id, :expires_at)
 	`
 
 	checkIn.ID = uuid.NewString()
@@ -36,7 +37,7 @@ func GetCheckInByID(ctx context.Context, q QueryRunner, checkInID string) (*type
 
 func GetCheckInsByUserID(ctx context.Context, q QueryRunner, userID string) ([]*types.CheckIn, error) {
 	query := `
-		SELECT * FROM check_ins WHERE user_id = $1
+		SELECT * FROM check_ins WHERE user_id = $1 ORDER BY created_at DESC
 	`
 
 	var checkIns []*types.CheckIn
@@ -47,24 +48,29 @@ func GetCheckInsByUserID(ctx context.Context, q QueryRunner, userID string) ([]*
 	return checkIns, nil
 }
 
-//
-//func GetCheckInsByReviewerID(ctx context.Context, q QueryRunner, reviewerUserID string) ([]*types.CheckIn, error) {
-//	query := `
-//		SELECT * FROM check_ins WHERE reviewer_user_id = $1
-//	`
-//
-//	var users []*types.User
-//	err := q.SelectContext(ctx, &users, query, reviewerUserID)
-//	if err != nil {
-//		return nil, errors.Wrap(err, "error selecting users")
-//	}
-//	return users, nil
-//}
+func GetCheckInsByReviewerID(ctx context.Context, q QueryRunner, reviewerUserID string) ([]*types.CheckIn, error) {
+	query := `
+		SELECT * FROM check_ins WHERE reviewer_user_id = $1 ORDER BY created_at DESC
+	`
 
-//func CompleteCheckIn(ctx context.Context, q QueryRunner, checkIn *types.CheckIn) (string, error) {
-//
-//}
-//
+	var checkIns []*types.CheckIn
+	err := q.SelectContext(ctx, &checkIns, query, reviewerUserID)
+	if err != nil {
+		return nil, errors.Wrap(err, "error selecting users")
+	}
+	return checkIns, nil
+}
+
+func SetCheckInCompleted(ctx context.Context, q QueryRunner, checkInID string) (*types.CheckIn, error) {
+	query := `
+UPDATE check_ins
+SET completed_at = NOW()
+WHERE id = $1
+RETURNING *`
+	var c types.CheckIn
+	err := q.QueryRowxContext(ctx, query, checkInID).StructScan(&c)
+	return &c, err
+}
 
 func CreateQuestion(ctx context.Context, q QueryRunner, qt types.QuestionType, checkInID string, position int) (string, error) {
 	query := `
@@ -132,4 +138,46 @@ func GetQuestionResponses(ctx context.Context, q QueryRunner, questionID string)
 	return responses, nil
 }
 
-// func CompleteResponse(ctx context.Context, q QueryRunner, responseID) {}
+func UpdateCheckInReview(ctx context.Context, q QueryRunner, checkInID string, review string) (*types.CheckIn, error) {
+	query := `
+UPDATE check_ins
+SET reviewed_at = NOW(), review = $1
+WHERE id = $2
+RETURNING *`
+	var c types.CheckIn
+	err := q.QueryRowxContext(ctx, query, review, checkInID).StructScan(&c)
+	return &c, err
+}
+
+func SetCheckInsExpired(ctx context.Context, q QueryRunner) ([]*types.CheckIn, error) {
+	query := `
+UPDATE check_ins
+SET expired = true
+WHERE expires_at < NOW()
+AND expired = false
+RETURNING *`
+	var c []*types.CheckIn
+	err := q.SelectContext(ctx, &c, query)
+	return c, err
+}
+
+func DeleteOpenCheckInsForUserID(ctx context.Context, q QueryRunner, userID string) error {
+	query := `
+		DELETE FROM check_ins WHERE user_id = $1 AND completed_at IS NULL AND expired = false 
+	`
+
+	_, err := q.ExecContext(ctx, query, userID)
+	return err
+}
+
+func ExtendCheckInExpiresByOrganizationID(ctx context.Context, q QueryRunner, orgID string, expiresAt time.Time) ([]*types.CheckIn, error) {
+	query := `
+UPDATE check_ins
+SET expires_at = $1
+WHERE organization_id = $2
+AND expired = false
+RETURNING *`
+	var c []*types.CheckIn
+	err := q.SelectContext(ctx, &c, query, expiresAt, orgID)
+	return c, err
+}

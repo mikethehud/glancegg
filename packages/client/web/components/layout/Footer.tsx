@@ -5,7 +5,7 @@ import styles from "./Layout.module.css"
 export const Footer = () => (
     <footer className={styles.footer}>
         <div className="text-small">
-            © Masterful 2022. All rights reserved.
+            © Ponder 2023. All rights reserved.
         </div>
         <div className={styles.footerSocials}>
             <a href="https://instagram.com"><FontAwesomeIcon icon={faInstagram} /></a>

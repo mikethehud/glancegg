@@ -1,13 +1,16 @@
 import { NextPage } from "next"
-import { useRouter } from "next/router"
+import Router, { useRouter } from "next/router"
 import { BottomLink, BottomLinks } from "../../components/bottomLinks/BottomLinks"
+import { Button } from "../../components/button/Button"
 import { Container } from "../../components/container/Container"
 import { Section } from "../../components/container/Section"
 import { LayoutPublic } from "../../components/layout/LayoutPublic"
-import { SignupForm } from "../../components/signup/SignupForm"
+import { Redirect } from "../../components/redirect/Redirect"
 import { SignupFormWithOrg } from "../../components/signup/SignupFormWithOrg"
-import { useGetOrganizationInfoQuery } from "../../lib/graphql/generated/generated"
+import { useToast } from "../../lib/context/toastContext"
+import { useGetOrganizationInfoQuery, useGetUserQuery, useJoinOrganizationMutation } from "../../lib/graphql/generated/generated"
 import { useAuth } from "../../lib/hooks/useAuth"
+import { removeToken } from "../../lib/jwt/jwt"
 
 interface IniviteSignupProps {
     orgID: string
@@ -16,26 +19,66 @@ interface IniviteSignupProps {
 }
 
 const InviteSignup = ({ orgID, redirectToHome, currentPath }: IniviteSignupProps) => {
+    const { showSuccessToast } = useToast()
+    const router = useRouter()
+    const [joinOrg] = useJoinOrganizationMutation({
+        onCompleted: () => {
+            showSuccessToast(`Joined ${data?.organizationInfo.name}`)
+            removeToken()
+            router.push('/home')
+        },
+        refetchQueries: ['GetUser', 'GetOrganizationAndMembers']
+    })
     const { data, loading } = useGetOrganizationInfoQuery({ variables: { orgID } })
+    const user = useGetUserQuery()
+
+    function join() {
+        if (!user.data || !data) {
+            return
+        }
+        joinOrg({
+            variables: {
+                orgID: data.organizationInfo.id
+            }
+        })
+    }
+
+    if (user.loading || loading) {
+        return <LayoutPublic loading />
+    }
+
+    if (!data) {
+        return <LayoutPublic>Error loading invite.</LayoutPublic>
+    }
+
     return (
-        <LayoutPublic loading={loading}>
+        <LayoutPublic title={`Join ${data.organizationInfo.name}`} loading={loading}>
             <Container size="medium">
                 <Section>
-                    <h1>Join {data?.organizationInfo.name} on Masterful.</h1>
+                    <h1>Join {data.organizationInfo.name} on Masterful.</h1>
                 </Section>
                 <Section>
-                    Todo: Add some text here to explain why it's cool 😎
+                    Todo: Add description
                 </Section>
-                <SignupFormWithOrg
-                    organizationID={orgID}
-                    onSuccess={() => redirectToHome()}
-                />
+                <Section>
+                    {user.data
+                        ? <Button primary variant="do" onClick={() => join()}>&rarr; Join {data.organizationInfo.name}</Button>
+                        : (
+                            <SignupFormWithOrg
+                                organizationID={orgID}
+                                onSuccess={() => redirectToHome()}
+                            />
+                        )
+                    }
+                </Section>
+                <BottomLinks>
+                    {!user.data && (
+                        <BottomLink href={`/login?redirectTo=`+currentPath} primary>
+                            Already Have An Account?
+                        </BottomLink>
+                    )}
+                </BottomLinks>
             </Container>
-            <BottomLinks>
-                <BottomLink href={`/login?redirectTo=`+currentPath} primary>
-                    Already Have An Account?
-                </BottomLink>
-            </BottomLinks>
         </LayoutPublic>
     )
 }
@@ -60,7 +103,6 @@ const Invite: NextPage = ({}) => {
     const { loading, authenticated, tokenData } = useAuth()
 
     const redirectToHome = () => router.push('/home')
-    const redirectToSwitch = () => router.push
 
     if (loading || !isReady) {
         return <LayoutPublic loading={loading} />
@@ -71,13 +113,7 @@ const Invite: NextPage = ({}) => {
     }
 
     if (authenticated && tokenData && tokenData.orgID) {
-        if (orgID === tokenData.orgID) {
-            // if already logged in and same org, go home
-            redirectToHome()
-        }
-        else {
-            return <InviteSwitch orgID={orgID} />
-        }
+        redirectToHome()
     }
 
     return (

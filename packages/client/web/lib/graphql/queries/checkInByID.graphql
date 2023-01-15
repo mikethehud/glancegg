@@ -1,14 +1,8 @@
 query GetCheckInByID($checkInID: ID!) {
     checkInByID(checkInID:$checkInID) {
-        id
-        createdAt
-        completedAt
-        reviewedAt
+        ...BaseCheckInData
         questions {
-            id
-            text
-            questionType
-            responseType
+            ...BaseQuestionData
         }
     }
 }

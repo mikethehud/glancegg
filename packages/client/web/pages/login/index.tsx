@@ -74,39 +74,41 @@ const Login: NextPage = () => {
     }
 
     return (
-        <LayoutPublic>
+        <LayoutPublic title="Login">
             <Container size="small">
-                <Card>
-                    <form onSubmit={handleSubmit(onSubmit)}>
-                        <Section>
-                            <h1>Login</h1>
-                        </Section>
-                        <Section>
-                            <FormElement label="Email">
-                                <TextInput
-                                    type="email"
-                                    placeholder="Enter Email"
-                                    error={errors.email && "Enter your email"}
-                                    {...register("email", { required: true })}
-                                />
-                            </FormElement>
-                        </Section>
-                        <Section>
-                            <FormElement label="Password">
-                                <TextInput
-                                    type="password"
-                                    placeholder="Enter Password"
-                                    error={errors.password && "Enter your password"}
-                                    {...register("password", { required: true })}
-                                />
-                            </FormElement>
-                        </Section>
-                        {error && <FormError error={getErrorMessage(error.message)} />}
-                        <Section>
-                            <Button primary loading={loading} type="submit">Log In</Button>
-                        </Section>
-                    </form>
-                </Card>
+                <Section>
+                    <Card>
+                        <form onSubmit={handleSubmit(onSubmit)}>
+                            <Section>
+                                <h1>Login</h1>
+                            </Section>
+                            <Section>
+                                <FormElement label="Email">
+                                    <TextInput
+                                        type="email"
+                                        placeholder="Enter Email"
+                                        error={errors.email && "Enter your email"}
+                                        {...register("email", { required: true })}
+                                    />
+                                </FormElement>
+                            </Section>
+                            <Section>
+                                <FormElement label="Password">
+                                    <TextInput
+                                        type="password"
+                                        placeholder="Enter Password"
+                                        error={errors.password && "Enter your password"}
+                                        {...register("password", { required: true })}
+                                    />
+                                </FormElement>
+                            </Section>
+                            {error && <FormError error={getErrorMessage(error.message)} />}
+                            <Section>
+                                <Button primary loading={loading} type="submit">Log In</Button>
+                            </Section>
+                        </form>
+                    </Card>
+                </Section>
                 <BottomLinks>
                     <BottomLink href="/signup" primary>
                         Create New Account

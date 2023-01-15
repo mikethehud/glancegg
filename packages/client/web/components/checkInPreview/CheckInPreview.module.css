@@ -1,0 +1,63 @@
+
+
+.checkInPreview {
+    display: grid;
+    grid-template-columns: auto 200px 80px;
+    align-items: center;
+    font-size: var(--text-size-s);
+    padding: var(--space-s) var(--space-m);
+    opacity: 0.25;
+    border-radius: var(--border-radius);
+    cursor: default;
+}
+
+.checkInPreview.clickable {
+    cursor: pointer;
+    opacity: 1;
+}
+
+.checkInPreview.currentCheckIn {
+    background-color: var(--color-highlight);
+    opacity: 1;
+}
+
+.checkInPreview.clickable:hover {
+    opacity: 1;
+    background-color: var(--color-lowlight);
+}
+
+.checkInPreviewUser {
+    display: flex;
+    flex-direction: row;
+    gap: var(--space-xs);
+    align-items: center;
+}
+
+.checkInStatus {
+    border-radius: var(--border-radius);
+    padding: var(--space-xxs) var(--space-xs);
+    font-size: var(--text-size-xs);
+    text-transform: uppercase;
+    background-color: var(--color-white);
+    text-align: center;
+    color: var(--color-black);
+    font-weight: bold;
+}
+
+.checkInStatus.completed {
+    background-color: var(--color-yellow);
+}
+
+.checkInStatus.reviewed {
+    background-color: var(--color-green);
+}
+
+.checkInStatus.expired {
+    background-color: var(--color-red);
+    color: var(--color-white);
+}
+
+.checkInStatus.new {
+    background-color: var(--color-text);
+    color: var(--color-background);
+}

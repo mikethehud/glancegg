@@ -1,0 +1,24 @@
+.scale {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: var(--space-s);
+}
+
+.number {
+    text-align: center;
+    width: var(--space-xl);
+    height: var(--space-xl);
+    border-radius: var(--space-xl);
+    line-height: calc(var(--space-xl) - 2px);
+    border: 2px solid var(--color-text);
+    font-weight: bold;
+    opacity: 0.25;
+}
+
+.number.active {
+    border-color: var(--color-text);
+    background-color: var(--color-text);
+    color: var(--color-background);
+    opacity: 1;
+}

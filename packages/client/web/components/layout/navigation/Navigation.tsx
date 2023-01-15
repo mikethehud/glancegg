@@ -5,7 +5,7 @@ import { UserDropdown } from "./UserDropdown";
 import { Logo } from "./Logo";
 import { User } from "../../../lib/graphql/generated/generated";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheckToSlot, faHandBackFist } from "@fortawesome/free-solid-svg-icons";
+import { faCheckToSlot, faHandBackFist, faBullhorn } from "@fortawesome/free-solid-svg-icons";
 import classNames from "classnames";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { useRouter } from "next/router";
@@ -18,10 +18,12 @@ interface MenuItemProps {
 }
 
 const MenuItem = ({ icon, href, currentPath, notifications, children }: MenuItemProps&PropsWithChildren) => {
+    const isPath = currentPath.startsWith(href)
+
     const classes = classNames(
         styles.menuItem,
         notifications && styles.hasNotifications,
-        currentPath === href && styles.active
+        isPath && styles.active
     )
     
     return (
@@ -44,14 +46,14 @@ export const Navigation = ({ user }: NavigationProps) => {
 
     return (
         <div className={styles.navigation}>
-            <Link href="/">
+            <Link href="/home">
                 <a>
                     <Logo />
                 </a>
             </Link>
             <div className={styles.right}>
-                <MenuItem currentPath={asPath} href="/checkins" icon={faCheckToSlot}>Check Ins</MenuItem>
-                <MenuItem currentPath={asPath} href="/reports" icon={faHandBackFist}>Fistbumps</MenuItem>
+                <MenuItem currentPath={asPath} href="/check_ins" icon={faCheckToSlot}>Check-Ins</MenuItem>
+                <MenuItem currentPath={asPath} href="/shout_outs" icon={faBullhorn}>Shout Outs</MenuItem>
                 <div className={styles.divider} />
                 <UserDropdown user={user} organization={user.organization} />
             </div>

@@ -1,5 +1,5 @@
 .button {
-    background-color: var(--color-background);
+    background-color: transparent;
     color: var(--color-text);
     border: var(--border-width) solid var(--color-text);
     padding: var(--space-s) var(--space-m);
@@ -19,9 +19,19 @@
     color: var(--color-background);
 }
 
+.button.info {
+    border-color: var(--color-white-accent);
+    color: var(--color-white-accent);
+}
+
+.button.info.primary {
+    background-color: var(--color-white-accent);
+    color: var(--color-background);
+}
+
 .button.caution {
     border-color: var(--color-red);
-    color: var(--color-white);
+    color: var(--color-red);
 }
 
 .button.caution.primary {
@@ -41,8 +51,7 @@
 
 .button:disabled {
     opacity: 0.3 !important;
-    background-color: var(--color-gray) !important;
-    border-color: var(--color-gray) !important;
+    cursor: default;
 }
 
 /* sizes */
@@ -69,11 +78,6 @@
 
 .iconButton .icon {
     margin-right: 0 !important;
-}
-
-.button:disabled {
-    cursor: default;
-    opacity: .7;
 }
 
 .button > svg {

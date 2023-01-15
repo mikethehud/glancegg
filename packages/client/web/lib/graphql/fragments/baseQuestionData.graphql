@@ -1,0 +1,6 @@
+fragment BaseQuestionData on Question {
+    id
+    text
+    questionType
+    responseType
+}

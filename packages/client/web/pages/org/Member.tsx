@@ -4,7 +4,7 @@ import { RoleRestricted } from "../../components/role/Role"
 import { faCheck, faUserTimes, faX } from "@fortawesome/free-solid-svg-icons"
 import { IconButton } from "../../components/button/IconButton"
 import { Select } from "../../components/select/Select"
-import { Role, User, useRemoveUserFromOrganizationMutation, useUpdateUserPermissionsMutation } from "../../lib/graphql/generated/generated"
+import { Role, User, useRemoveUserFromOrganizationMutation, useUpdateReportsToMutation, useUpdateRoleMutation } from "../../lib/graphql/generated/generated"
 import styles from "./Org.module.css"
 import { Spinner } from "../../components/spinner/Spinner"
 import { Section } from "../../components/container/Section"
@@ -16,6 +16,7 @@ import { useToast } from "../../lib/context/toastContext"
 import { Dialog } from "../../components/dialog/Dialog"
 import { useEffect, useState } from "react"
 import { FormError } from "../../components/formError/FormError"
+import { ConfirmButtons } from "./ConfirmButtons"
 
 interface SettingProps {
     title: string
@@ -45,7 +46,7 @@ interface MemberData {
 
 interface MemberInputs {
     reportsTo: string
-    role: string
+    role: Role
 }
 
 export const Member = ({ user, possibleReports, isOnlyAdmin }: MemberData) => {
@@ -55,12 +56,19 @@ export const Member = ({ user, possibleReports, isOnlyAdmin }: MemberData) => {
     }
     const { showSuccessToast } = useToast()
     const { register, getValues, reset, formState: { isDirty, dirtyFields } } = useForm<MemberInputs>({defaultValues})
-    const [updateUser, { error: updateUserError }] = useUpdateUserPermissionsMutation({
+    const [updateRole, { error: updateRoleError }] = useUpdateRoleMutation({
         onCompleted: () => {
-            showSuccessToast(`Permissions for ${user.firstName} ${user.lastName} have been updated`)
+            showSuccessToast(`Role for ${user.firstName} ${user.lastName} has been updated`)
             reset({
-                reportsTo: getValues("reportsTo"),
                 role: getValues("role")
+            })
+        }
+    })
+    const [updateReportsTo, { error: updateReportsToError }] = useUpdateReportsToMutation({
+        onCompleted: () => {
+            showSuccessToast(`Report for ${user.firstName} ${user.lastName} has been updated`)
+            reset({
+                reportsTo: getValues("reportsTo")
             })
         }
     })
@@ -70,15 +78,24 @@ export const Member = ({ user, possibleReports, isOnlyAdmin }: MemberData) => {
     const [showRemoveDialog, setShowRemoveDialog] = useState(false)
 
     const commitUpdates = () => {
-        updateUser({
-            variables: {
-                userID: user.id,
-                input: {
-                    reportsTo: dirtyFields.reportsTo ? getValues("reportsTo") : undefined,
-                    role: dirtyFields.role ? getValues("role") : undefined
+        if (dirtyFields.reportsTo) {
+            const reportsTo = getValues("reportsTo") == "" ? null : getValues('reportsTo')
+            updateReportsTo({
+                variables: {
+                    userID: user.id,
+                    reportsTo: reportsTo
                 }
-            }
-        })
+            })
+        }
+
+        if (dirtyFields.role) {
+            updateRole({
+                variables: {
+                    userID: user.id,
+                    role: Role.Admin
+                }
+            })
+        }
     }
 
     const removeUserFromOrg = () => {
@@ -120,22 +137,18 @@ export const Member = ({ user, possibleReports, isOnlyAdmin }: MemberData) => {
                         <Setting title="Role" className={styles.role}>
                             <Select defaultValue={user.role} {...register("role")}>
                                 {/* Only show User as option if there is more than one admin */}
-                                <option value="USER" disabled={isOnlyAdmin}>User</option>
-                                <option value="ADMIN">Admin</option>
+                                <option value={Role.User} disabled={isOnlyAdmin}>User</option>
+                                <option value={Role.Admin}>Admin</option>
                             </Select>
                         </Setting>
                         <IconButton disabled={isOnlyAdmin} onClick={() => setShowRemoveDialog(true)} icon={faUserTimes} small variant="caution" primary />
                     </Section>
                 </RoleRestricted>
             </Card>
-            {isDirty && (
-                <div className={styles.confirmButtons}>
-                    <Button xsmall primary onClick={() => commitUpdates()} variant="do">Save Changes</Button>
-                    <Button xsmall onClick={() => reset()}>Dismiss</Button>
-                </div>
-            )}
+            {isDirty && <ConfirmButtons onConfirm={() => commitUpdates()} onCancel={() => reset()} />}
             {removeUserError && <FormError error={removeUserError.message} />}
-            {updateUserError && <FormError error={updateUserError.message} />}
+            {updateRoleError && <FormError error={updateRoleError.message} />}
+            {updateReportsToError && <FormError error={updateReportsToError.message} />}
         </div>
     )
 }

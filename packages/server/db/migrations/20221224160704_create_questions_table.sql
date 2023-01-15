@@ -5,7 +5,7 @@ CREATE TYPE response_type AS ENUM ('TASK', 'TEXT', 'SCALE');
 CREATE TABLE questions (
     id uuid NOT NULL PRIMARY KEY,
     position smallint NOT NULL,
-    check_in_id uuid REFERENCES check_ins(id) NOT NULL,
+    check_in_id uuid NOT NULL REFERENCES check_ins(id) ON DELETE CASCADE,
     question_type varchar(64) NOT NULL,
     text varchar(264),
     response_type response_type NOT NULL

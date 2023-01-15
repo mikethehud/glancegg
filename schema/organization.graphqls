@@ -2,6 +2,8 @@ type Organization {
     id: ID!
     name: String!
     members: [User!]!
+    timezone: String!
+    checkInWeekday: Int!
 }
 
 type OrganizationInfo {
@@ -11,6 +13,7 @@ type OrganizationInfo {
 
 input CreateOrganizationAndJoinInput {
     name: String!
+    timezone: String!
 }
 
 extend type Query {
@@ -18,7 +21,13 @@ extend type Query {
     organizationInfo(id: String!): OrganizationInfo!
 }
 
+input OrgSettingsInput {
+    timezone: String!
+    checkInWeekday: Int!
+}
+
 extend type Mutation {
+    updateOrgSettings(input: OrgSettingsInput!): Organization!
     createOrganizationAndJoin(input: CreateOrganizationAndJoinInput!): User!
     removeUserFromOrganization(userID: ID!): Organization!
     deleteOrganization: Boolean

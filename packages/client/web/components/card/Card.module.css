@@ -2,9 +2,29 @@
     background-color: var(--color-background-accent);
     border-radius: var(--border-radius);
     padding: var(--space-s) var(--space-m);
+    transition: box-shadow 0.1s ease-out;
+    position: relative;
 }
 
 .hoverEffect:hover {
-    background-color: var(--color-gray);
     cursor: pointer;
+    box-shadow: var(--shadow);
+}
+
+.shadow {
+    box-shadow: var(--shadow);
+}
+
+.icon {
+    padding: var(--space-xs) 0;
+    font-size: var(--text-size-s);
+    color: var(--color-text-accent);
+}
+
+.icon.caution {
+    color: var(--color-red);
+}
+
+.icon.do {
+    color: var(--color-green);
 }

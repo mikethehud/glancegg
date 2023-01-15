@@ -78,5 +78,8 @@ func IsAuthenticated(ctx context.Context) bool {
 
 func IsAdmin(ctx context.Context) bool {
 	role := ContextRole(ctx)
+	if role == nil {
+		return false
+	}
 	return *role == types.AdminRole
 }

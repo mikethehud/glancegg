@@ -1,0 +1,17 @@
+query GetCheckInByIDWithResponses($checkInID: ID!) {
+    checkInByID(checkInID:$checkInID) {
+        ...BaseCheckInData
+        user {
+            id
+        }
+        review
+        questions {
+            ...BaseQuestionData
+            responses {
+                __typename
+                id
+                response
+            }
+        }
+    }
+}

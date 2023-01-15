@@ -8,6 +8,7 @@ input SignUpWithOrgInput {
 
 input SignUpWithoutOrgInput {
     organizationName: String!
+    organizationTimezone: String!
     firstName: String!
     lastName: String!
     email: String!

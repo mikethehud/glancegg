@@ -1,0 +1,6 @@
+mutation UpdateRole($userID: ID!, $role: Role!) {
+    updateRole(userID:$userID, role:$role) {
+        id
+        role
+    }
+}

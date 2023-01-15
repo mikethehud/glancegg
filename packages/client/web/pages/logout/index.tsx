@@ -10,10 +10,12 @@ import { removeToken } from "../../lib/jwt/jwt";
 import { LayoutPublic } from "../../components/layout/LayoutPublic";
 import { useApolloClient } from "@apollo/client";
 import { BottomLink, BottomLinks } from "../../components/bottomLinks/BottomLinks";
+import { Section } from "../../components/container/Section";
 
 const Logout: NextPage = () => {
     const [logOut, { loading, error }] = useLogOutMutation()
     const client = useApolloClient()
+    const title = "Logout"
 
     useEffect(() => {
         logOut().then(() => {
@@ -22,20 +24,22 @@ const Logout: NextPage = () => {
         })
     }, [])
 
-    loading && <LayoutPublic loading={true} />
+    loading && <LayoutPublic loading={true} title={title} />
 
     return (
-        <LayoutPublic>
+        <LayoutPublic title={title}>
             {error && <FormError error={error?.message} />}
             <Container size="small">
-                <h1>Successfully logged out.</h1>
-                <p>Have a great day! 👋</p>
+                <Section>
+                    <h1>Successfully logged out.</h1>
+                    <p>Have a great day! 👋</p>
+                </Section>
+                <BottomLinks>
+                    <BottomLink href="/login" primary>
+                        Log In
+                    </BottomLink>
+                </BottomLinks>
             </Container>
-            <BottomLinks>
-                <BottomLink href="/login" primary>
-                    Log In
-                </BottomLink>
-            </BottomLinks>
         </LayoutPublic>
     )
 }

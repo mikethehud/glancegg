@@ -81,18 +81,35 @@ func GetUsersReportingToID(ctx context.Context, q QueryRunner, userID string) ([
 	return users, nil
 }
 
-func UpdateUserPermissions(ctx context.Context, q QueryRunner, userID string, orgID string, role types.Role, reportingTo *string) (*types.User, error) {
+func UpdateRole(ctx context.Context, q QueryRunner, userID string, orgID string, role types.Role) (*types.User, error) {
 	query := `
 UPDATE users SET
-role = COALESCE($1, role),
-reports_to = COALESCE($2, reports_to)
-WHERE id = $3 AND organization_id = $4
+role = $1
+WHERE id = $2 AND organization_id = $3
 RETURNING *
 	`
 
 	u := types.User{}
 
-	err := q.QueryRowxContext(ctx, query, role, reportingTo, userID, orgID).StructScan(&u)
+	err := q.QueryRowxContext(ctx, query, role, userID, orgID).StructScan(&u)
+	if err != nil {
+		return nil, err
+	}
+
+	return &u, nil
+}
+
+func UpdateReportsTo(ctx context.Context, q QueryRunner, userID string, orgID string, reportingTo *string) (*types.User, error) {
+	query := `
+UPDATE users SET
+reports_to = $1
+WHERE id = $2 AND organization_id = $3
+RETURNING *
+	`
+
+	u := types.User{}
+
+	err := q.QueryRowxContext(ctx, query, reportingTo, userID, orgID).StructScan(&u)
 	if err != nil {
 		return nil, err
 	}
@@ -151,6 +168,22 @@ func GetUserFromCheckIn(ctx context.Context, q QueryRunner, checkInID string) (*
 		SELECT u.*
 		FROM check_ins c
 		LEFT JOIN users u ON u.id = c.user_id
+ 		WHERE c.id = $1
+	`
+
+	u := &types.User{}
+	err := q.GetContext(ctx, u, query, checkInID)
+	if err != nil {
+		return nil, err
+	}
+	return u, nil
+}
+
+func GetReviewerFromCheckIn(ctx context.Context, q QueryRunner, checkInID string) (*types.User, error) {
+	query := `
+		SELECT u.*
+		FROM check_ins c
+		LEFT JOIN users u ON u.id = c.reviewer_user_id
  		WHERE c.id = $1
 	`
 

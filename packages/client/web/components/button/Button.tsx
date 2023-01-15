@@ -6,7 +6,7 @@ import { Spinner } from "../spinner/Spinner";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-type ButtonVariant = 'do' | 'caution'
+type ButtonVariant = 'do' | 'caution' | 'info'
 
 export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
     primary?: boolean;

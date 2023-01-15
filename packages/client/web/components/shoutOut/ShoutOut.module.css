@@ -1,0 +1,62 @@
+.shoutOut {
+    background: linear-gradient(to left, rgba(189, 189, 125, 0.6), var(--color-background-accent));
+    background-color: var(--color-background-accent);
+    border: 2px solid var(--color-text-accent);
+}
+
+.icon {
+    font-size: var(--text-size-s);
+    margin-right: var(--space-xs);
+    color: var(--color-text);
+}
+
+.people {
+    display: flex;
+    flex-direction: row;
+    font-weight: bold;
+    font-size: var(--text-size-s);
+    align-items: center;
+}
+
+.name {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-xxs);
+}
+
+.arrow {
+    color: var(--color-text-accent);
+    font-size: var(--text-size-s);
+    font-weight: bold;
+    padding: 0 var(--space-xxs);
+}
+
+.text {
+    padding-top: var(--space-m);
+    padding-bottom: var(--space-s);
+    font-style: italic;
+}
+
+.date {
+    font-size: var(--text-size-xs);
+    color: var(--color-text);
+    text-align: right;
+}
+
+.shoutOutForm {
+    display: flex;
+    flex-direction: column;
+}
+
+.formTextArea {
+    position: relative;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.formSelect {
+    border-top-right-radius: 0 !important;
+    border-top-left-radius: 0 !important;
+    border-top: 0;
+}

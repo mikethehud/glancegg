@@ -6,8 +6,10 @@ export type SelectProps = React.SelectHTMLAttributes<HTMLSelectElement>
 
 export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     ({ children, className, ...attributes }, forwardRef) => (
-        <select {...attributes} className={classNames(className, styles.select)} ref={forwardRef}>
-            {children}
-        </select>
+        <div className={classNames(className, styles.wrapper)}>
+            <select {...attributes} className={styles.select} ref={forwardRef}>
+                {children}
+            </select>
+        </div>
     )
 )

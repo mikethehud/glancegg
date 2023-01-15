@@ -28,6 +28,7 @@
     font-family: var(--font-family);
     text-transform: uppercase;
     font-weight: bold;
+    border: 2px solid transparent;
 }
 
 .menuItem .icon {
@@ -40,8 +41,8 @@
 }
 
 .menuItem:hover, .menuItem.hasNotifications:hover {
-    background-color: var(--color-gray);
     opacity: 1;
+    border-color: var(--color-text);
 }
 
 .menuItem.active, .menuItem.active.hasNotifications {
@@ -73,7 +74,7 @@
     width: 1px;
     height: var(--space-l);
     margin: 0px var(--space-s);
-    background-color: var(--color-gray);
+    background-color: var(--color-lowlight);
 }
 
 .orgLink {

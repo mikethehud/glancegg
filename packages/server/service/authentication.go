@@ -85,7 +85,7 @@ func (s *Service) LogInWithPassword(ctx context.Context, email, password string)
 
 func (s *Service) SignUpWithoutOrg(ctx context.Context, input *model.SignUpWithoutOrgInput) (*types.User, error) {
 	tx := s.dbx.MustBegin()
-	orgID, err := s.createOrganization(ctx, tx, input.OrganizationName)
+	orgID, err := s.createOrganization(ctx, tx, input.OrganizationName, input.OrganizationTimezone)
 	if err != nil {
 		tx.Rollback()
 		return nil, err
@@ -101,7 +101,7 @@ func (s *Service) SignUpWithoutOrg(ctx context.Context, input *model.SignUpWitho
 	})
 	if err != nil {
 		tx.Rollback()
-		return nil, utils.InternalError(s.Logger, err, "error creating user")
+		return nil, err
 	}
 	err = tx.Commit()
 	if err != nil {

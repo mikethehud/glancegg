@@ -8,8 +8,8 @@ import (
 
 func CreateOrganization(ctx context.Context, q QueryRunner, org types.Organization) (string, error) {
 	query := `
-		INSERT INTO organizations (id, name)
-		VALUES (:id, :name)
+		INSERT INTO organizations (id, name, timezone)
+		VALUES (:id, :name, :timezone)
 	`
 
 	org.ID = uuid.NewString()
@@ -56,4 +56,23 @@ func DeleteOrganization(ctx context.Context, q QueryRunner, orgID string) error 
 
 	_, err := q.ExecContext(ctx, query, orgID)
 	return err
+}
+
+func UpdateOrgSettings(ctx context.Context, q QueryRunner, orgID string, timeZone string, checkInWeekday int) (*types.Organization, error) {
+	query := `
+UPDATE organizations SET
+timezone = $1,
+check_in_weekday = $2
+WHERE id = $3
+RETURNING *
+	`
+
+	o := types.Organization{}
+
+	err := q.QueryRowxContext(ctx, query, timeZone, checkInWeekday, orgID).StructScan(&o)
+	if err != nil {
+		return nil, err
+	}
+
+	return &o, nil
 }

@@ -61,5 +61,21 @@ func (r *queryResolver) OrganizationInfo(ctx context.Context, id string) (*model
 }
 
 func (r *mutationResolver) DeleteOrganization(ctx context.Context) (*bool, error) {
+	if !utils.IsAuthenticated(ctx) || !utils.IsAdmin(ctx) {
+		return nil, errors.New(utils.ErrorNoAccess)
+	}
+
 	return nil, r.Service.DeleteOrganization(ctx)
+}
+
+func (r *mutationResolver) UpdateOrgSettings(ctx context.Context, input model.OrgSettingsInput) (*model.Organization, error) {
+	if !utils.IsAuthenticated(ctx) || !utils.IsAdmin(ctx) {
+		return nil, errors.New(utils.ErrorNoAccess)
+	}
+
+	org, err := r.Service.UpdateOrgSettings(ctx, utils.ContextOrgID(ctx), input.Timezone, input.CheckInWeekday)
+	if err != nil {
+		return nil, err
+	}
+	return org.ToModel(), err
 }

@@ -1,7 +1,8 @@
 import Link from "next/link"
 import { PropsWithChildren } from "react"
-import { Container } from "../container/Container"
+import { Section } from "../container/Section"
 import { TextLink } from "../textLink/TextLink"
+import styles from "./BottomLinks.module.css"
 
 interface BottomLinkProps extends PropsWithChildren {
     primary?: boolean
@@ -19,7 +20,7 @@ export const BottomLink = ({ primary, href, children }: BottomLinkProps) => (
 )
 
 export const BottomLinks = ({ children }: PropsWithChildren) => (
-    <Container size="medium">
+    <Section className={styles.bottomLinks}>
         {children}
-    </Container>
+    </Section>
 )

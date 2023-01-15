@@ -1,0 +1,22 @@
+type ShoutOut {
+    id: ID!
+    shoutOut: String!
+    user: User!
+    receivers: [User!]!
+    createdAt: Time!
+}
+
+extend type Query {
+    shoutOuts: [ShoutOut!]
+    shoutOutsByCheckInID(checkInID: ID!): [ShoutOut!]
+}
+
+input ShoutOutInput {
+    shoutOut: String!
+    checkInID: String
+    receiverIDs: [ID!]!
+}
+
+extend type Mutation {
+    createShoutOut(input:ShoutOutInput!): ID!
+}

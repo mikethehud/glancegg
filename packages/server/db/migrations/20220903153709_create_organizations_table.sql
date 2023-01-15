@@ -3,7 +3,9 @@
 CREATE TABLE organizations (
     id uuid NOT NULL PRIMARY KEY,
     name varchar(64) NOT NULL,
-    created_at timestamp NOT NULL DEFAULT NOW()
+    created_at timestamp NOT NULL DEFAULT NOW(),
+    check_in_weekday smallserial NOT NULL,
+    timezone text NOT NULL
 );
 -- +goose StatementEnd
 

@@ -1,29 +1,81 @@
-.textInput {
-    background-color: var(--color-background-accent);
+.wrapper {
+    position: relative;
+}
+
+.textInput, .textArea {
+    background-color: var(--color-lowlight);
     padding: var(--space-s) var(--space-s);
-    border: 1px solid var(--color-gray);
+    padding-right: var(--space-xl);
+    border: 2px solid var(--color-text-accent);
     border-radius: var(--border-radius);
     font-size: var(--text-size-m);
     font-family: var(--font-family);
     color: var(--color-text);
     display: block;
+    outline: 0;
+    width: 100%;
 }
 
-.textInput::placeholder {
-    color: var(--color-gray);
+.hoverButtonWrapper {
+    position: absolute;
+    top: 0;
+    right: 15px;
+    height: 100%;
+    padding: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-xs);
+    opacity: 0;
 }
 
-.textInput.block {
+.hoverButton {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid var(--color-text);
+    color: var(--color-text);
+    border-radius: var(--border-radius);
+    font-size: var(--text-size-xs);
+    opacity: 0.5;
+}
+
+.hoverButton:hover {
+    opacity: 1;
+    cursor: pointer;
+}
+
+.wrapper:hover .hoverButtonWrapper {
+    opacity: 1;
+}
+
+.textInput:focus, .textArea:focus {
+    border-color: var(--color-text);
+}
+
+.textInput::placeholder, .textArea::placeholder {
+    color: var(--color-text);
+    opacity: 0.35;
+}
+
+.textInput.block, .textArea.block {
     width: 100%;
     display: block;
 }
 
+.textArea {
+    resize:vertical;
+}
+
 .error {
-    border-color: red;
+    border-color: var(--color-red);
 }
 
 .errorMessage {
-    color: red;
+    color: var(--color-red);
     font-size: var(--text-size-s);
     padding-top: var(--space-xs);
 }

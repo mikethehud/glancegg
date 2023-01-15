@@ -1,0 +1,15 @@
+query GetShoutOutsByCheckInID($checkInID:ID!) {
+    shoutOutsByCheckInID(checkInID:$checkInID) {
+        id
+        user {
+            firstName
+            lastName
+        }
+        receivers {
+            firstName
+            lastName
+        }
+        shoutOut
+        createdAt
+    }
+}
